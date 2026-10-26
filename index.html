@@ -1,0 +1,1132 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dynasty</title>
+<style>
+:root{--g0:#DAD7CD;--g1:#A3B18A;--g2:#588157;--g3:#3A5A40;--g4:#344E41;--ink:#000;--paper:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,"Segoe UI",sans-serif;background:var(--g0);color:var(--ink)}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+aside{background:var(--g4);color:var(--paper);padding:18px 10px;position:sticky;top:0;height:100vh;overflow:auto}
+.logo{font:600 26px Georgia,serif;padding:0 10px 14px}
+nav a{display:block;padding:8px 10px;border-radius:9px;color:var(--paper);text-decoration:none}
+nav a.on,nav a:hover{background:var(--g2)}
+nav h6{margin:18px 10px 4px;color:#ffffffb3;font-size:11px;font-weight:600}
+main{padding:24px 30px;max-width:1040px;width:100%}
+h1{font:500 34px Georgia,serif;margin:2px 0 4px}
+.mut{color:#000000b3}
+.card{background:var(--g1);border-radius:16px;padding:16px;margin:14px 0}
+.card h3{margin:0 0 10px;font:600 14px Georgia,serif}
+input,select,textarea,button{font:inherit;color:var(--ink);background:var(--g0);border:1px solid var(--g2);border-radius:10px;padding:8px 10px}
+input::placeholder,textarea::placeholder{color:#0000008c}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--g4)}
+button{cursor:pointer}
+.btn{background:var(--g3);color:var(--paper);border:0;font-weight:600}
+.add{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.add input[name=title]{flex:1;min-width:180px}
+.task{display:flex;gap:10px;align-items:center;padding:9px 4px;border-top:1px solid #00000022}
+.task:first-child{border-top:0}
+.task.done .tn{text-decoration:line-through;opacity:.6}
+.tt{flex:1;min-width:0}
+.tn{font-weight:600;cursor:text}
+.chk{width:24px;height:24px;border-radius:50%;padding:0;font-size:13px;border-color:var(--g3)}
+.done .chk{background:var(--g3);color:var(--paper)}
+.ib{border:0;background:transparent;padding:4px 7px;color:#000000a6;font-size:15px;border-radius:8px}
+.ib.on{background:var(--g4);color:var(--paper)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
+.chip{background:var(--g0);border-radius:999px;padding:1px 9px;font-size:12px}
+.chip.due.late{background:var(--g3);color:var(--paper)}
+.stars{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.star{background:var(--g0);border:1px dashed var(--g3);border-radius:12px;padding:12px;min-height:64px}
+.star b{display:block;color:#000000b3;font-weight:500;font-size:12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.day{background:var(--g0);border-radius:10px;padding:8px;min-height:110px;font-size:12px}
+.day h4{margin:0 0 6px;font-size:12px}
+.day.now{outline:2px solid var(--g4)}
+.ev{background:var(--g3);color:var(--paper);border-radius:6px;padding:2px 6px;margin-bottom:4px}
+.cell{min-height:70px;cursor:pointer}
+.cell.sel{outline:3px solid var(--g2)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g3);margin-right:3px}
+.split{display:grid;grid-template-columns:240px 1fr;gap:14px}
+.ni{padding:7px 9px;border-radius:8px;cursor:pointer}
+.ni.on{background:var(--g2);color:var(--paper)}
+.bars{display:flex;gap:10px;align-items:flex-end;height:170px}
+.bc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px}
+.bc i{width:100%;background:var(--g3);border-radius:6px 6px 0 0;min-height:2px}
+.bc em{font-style:normal;font-size:11px;color:#000000b3}
+.meter{height:8px;background:var(--g0);border-radius:99px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--g3)}
+.timer{font:500 72px Georgia,serif;text-align:center;margin:10px 0}
+.hcell{width:30px;height:30px;padding:0;border-radius:8px}
+.hcell.on{background:var(--g3);color:var(--paper)}
+.months{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mo{background:var(--g0);border-radius:10px;padding:10px;min-height:90px;font-size:13px}
+.mo.now{outline:2px solid var(--g4)}
+.mo h4{margin:0 0 6px;font:600 14px Georgia,serif}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--g4);color:var(--paper);padding:10px 16px;border-radius:12px;font-weight:600;display:none}
+summary{cursor:pointer}
+@media(max-width:800px){.app{grid-template-columns:1fr}aside{position:static;height:auto}.grid7,.split,.stars,.months{grid-template-columns:1fr}}
+.mod summary{display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer;list-style:none}
+.mod summary::-webkit-details-marker{display:none}
+.mod summary b{font:600 16px Georgia,serif}
+.mod summary b::before{content:"▸ "}
+.mod[open] summary b::before{content:"▾ "}
+button:disabled{opacity:.5;cursor:default}
+.fcard{background:var(--g0);border-radius:16px;padding:28px;font-size:20px;min-height:140px;display:flex;align-items:center;justify-content:center;text-align:center;margin:14px 0}
+.fcard.sm{font-size:16px;min-height:0;padding:16px;text-align:left;justify-content:flex-start}
+.counts{display:flex;gap:22px;justify-content:center;font-weight:600;margin:6px 0}
+.rate{display:flex;gap:8px;margin-top:12px}
+.rate button{flex:1;padding:10px 4px;font-weight:600;border:0}
+.rate small{display:block;font-weight:400}
+.rate .r1{background:var(--g4);color:var(--paper)}
+.rate .r2{background:var(--g3);color:var(--paper)}
+.rate .r3{background:var(--g2);color:var(--paper)}
+.rate .r4{background:var(--g0);color:var(--ink);border:1px solid var(--g3)}
+.rate .sug{outline:3px solid var(--ink)}
+#ans{width:100%;font-size:16px}
+.ok{background:var(--g2);color:var(--paper);border-radius:4px;padding:0 3px}
+.miss{background:var(--g0);border-radius:4px;padding:0 3px;text-decoration:underline wavy var(--g4)}
+.md{background:var(--g0);border-radius:10px;padding:14px;min-height:300px;overflow:auto}
+.md h1,.md h2,.md h3,.md h4{font-family:Georgia,serif;margin:14px 0 6px}
+.md h1{font-size:24px}.md h2{font-size:20px}.md h3{font-size:17px}
+.md pre{background:#00000014;padding:8px;border-radius:8px;overflow:auto}
+.md code{background:#00000014;padding:0 4px;border-radius:4px}
+.md blockquote{border-left:3px solid var(--g3);margin:8px 0;padding-left:10px}
+.kgrid{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start}
+.kmap{width:100%;height:auto;border-radius:14px;background:var(--g2);display:block}
+.plot{fill:transparent;cursor:pointer}.plot:hover{fill:#ffffff40}
+.kbtn{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;margin-bottom:6px;padding:8px 10px}
+.kbtn.sel{background:var(--g3);color:var(--paper)}
+.newb{animation:fadein .9s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@media(max-width:900px){.kgrid{grid-template-columns:1fr}}
+
+/* Dynasty — warm paper, forest ink */
+:root{--g0:#f3f3ec;--g1:#fffefa;--g2:#7c956d;--g3:#3c624c;--g4:#203d31;--ink:#273a30;--paper:#fffefa;--line:#e4e7dc;--muted:#768174}
+body{background:#f6f7f2;color:var(--ink);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.app{grid-template-columns:236px minmax(0,1fr)}
+aside{background:#eef1e8;color:var(--ink);padding:30px 16px 20px;border-right:1px solid var(--line)}
+.logo{font:600 29px/1.2 Georgia,serif;letter-spacing:-1px;padding:0 12px 28px;color:var(--g4)}
+.logo small{display:block;font:10px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:2px;margin-top:8px;color:var(--muted)}
+nav a{display:flex;align-items:center;gap:12px;padding:9px 12px;margin:3px 0;border-radius:8px;color:#61705e;font-size:13px;font-weight:500;transition:background .15s,color .15s}
+nav .nav-icon{width:19px;text-align:center;font-size:17px;line-height:1;color:#87927e}
+nav a:hover{background:#e4e9dc;color:var(--g4)}
+nav a.on{background:var(--g4);color:var(--paper);box-shadow:0 3px 8px #203d3112}
+nav a.on .nav-icon{color:#dce8c9}
+nav h6{margin:25px 12px 9px;font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:#8a9482}
+main{padding:48px clamp(24px,4vw,64px) 70px;max-width:1320px;min-width:0}
+h1{font:400 clamp(30px,3.2vw,42px)/1.2 Georgia,serif;letter-spacing:-1.3px;margin:8px 0 12px;color:var(--g4)}
+.mut{color:#778171;font-size:13px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:24px;margin:20px 0;box-shadow:0 3px 12px #253b2803}
+.card h3{font:600 15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0 0 16px;color:var(--g4)}
+input,select,textarea,button{border:1px solid #dce2d3;background:#fafbf7;border-radius:8px;padding:10px 12px;font-size:13px;max-width:100%;min-height:40px}
+input::placeholder,textarea::placeholder{color:#929a8b}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid #7c956d;outline-offset:3px}
+button{transition:background .15s,box-shadow .15s}
+button:hover{background:#e9eee1}
+.btn{background:var(--g4);color:var(--paper);padding:11px 18px;box-shadow:0 2px 3px #203d3110}
+.btn:hover{background:#355b43}
+.add{gap:10px}.add input[name=title]{min-width:160px}.add input[type=datetime-local]{width:202px}
+input[type=checkbox]{min-height:0;accent-color:var(--g3);vertical-align:middle}
+.task{gap:14px;padding:17px 0;border-color:#edf0e7}.tn{font-size:14px;font-weight:500}.chips{margin-top:6px;gap:7px}
+.chip{background:#eff2e9;color:#728168;font-size:10px;letter-spacing:.2px;padding:3px 8px}.chip.due{background:#f6f2e6;color:#927b42}.chip.due.late{background:#f7ebe5;color:#a5644e}
+.chk{width:22px;height:22px;min-height:22px;flex-shrink:0;border:1.5px solid #cbd5c0;background:transparent}.done .chk{background:var(--g3)}
+.ib{min-height:32px;color:#9ba58f;padding:4px 7px}.ib:hover{background:#edf1e6;color:var(--g4)}.ib.on{background:#e6eddb;color:var(--g3)}
+.stars{gap:14px}.star{background:#f6f7ef;border:1px solid #e5e9d9;border-radius:10px;padding:18px;min-height:108px}.star b{font:600 10px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;text-transform:uppercase;letter-spacing:1.6px;color:#879074;margin-bottom:12px}.star b:before{content:'✧';font-size:16px;margin-right:8px;color:#a6ae78}.star .mut{font-size:12px}
+.day{background:var(--paper);border:1px solid var(--line);padding:12px;min-width:0;overflow-wrap:anywhere}.day.now{outline:2px solid #91a87b;outline-offset:-2px;background:#f0f4e7}.day h4{color:#6a7c5f}.ev{background:#e6eddc;color:#45613c;padding:5px 7px;font-size:11px}.grid7{gap:8px;margin-top:20px}
+.ni{padding:11px 12px}.ni.on{background:#e5edda;color:var(--g4)}.split{grid-template-columns:230px minmax(0,1fr)}
+.md{background:#fafbf7;border:1px solid var(--line);padding:24px}.fcard{background:#f1f4e8;border:1px solid #e1e7d7;min-height:200px}.timer{font-size:90px;color:var(--g4);font-variant-numeric:tabular-nums;letter-spacing:-4px}
+.meter{background:#ebefdf}.meter i{background:#829a64}.mo{background:#f4f6ed;border:1px solid var(--line);padding:16px}.hcell{min-height:30px}.counts{color:#647653}summary{color:#65745b}details>summary{padding:6px 0}.mod summary b{font-family:inherit;font-size:15px}
+#toast{z-index:20;box-shadow:0 8px 32px #203d3129;font-size:13px;font-weight:500;padding:14px 20px;max-width:calc(100vw - 40px)}
+.today-intro{margin-bottom:30px}.eyebrow{text-transform:uppercase;letter-spacing:1.7px;font-size:10px;font-weight:600;color:#8c967f}.today-intro .quote{max-width:640px;font-size:13px;color:#859079}.section-label{display:flex;align-items:center;justify-content:space-between;gap:12px}.section-label span{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#8b957e}.task-count{font-size:12px;color:#87907c;margin:-8px 0 20px}
+@media(min-width:1450px){main{margin:0 auto}}
+@media(max-width:1100px){.add input[name=title]{flex-basis:100%}.kgrid{grid-template-columns:1fr}.grid7{gap:5px}.day{padding:8px}}
+@media(max-width:800px){.app{grid-template-columns:1fr}aside{position:static;height:auto;padding:18px 20px 12px;border-right:0;border-bottom:1px solid var(--line)}.logo{font-size:25px;padding:0 0 16px}.logo small{display:none}nav{display:flex;overflow-x:auto;gap:5px;padding-bottom:4px}nav a{flex-shrink:0;margin:0;padding:9px 12px}nav h6{display:none}main{padding:28px 20px 50px}.stars{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.star{padding:12px;min-height:110px}.card{padding:18px}.split,.months{grid-template-columns:1fr}.grid7{grid-template-columns:repeat(7,minmax(0,1fr));overflow-x:auto}.day{min-height:80px;font-size:10px}.day h4{font-size:10px}.timer{font-size:72px}}
+@media(max-width:480px){.stars{grid-template-columns:1fr}.star{min-height:76px}.star b{margin-bottom:4px}.add>*{flex:1 1 130px}.add input[type=datetime-local]{width:auto}.task{gap:9px}.task .ib{padding:4px}.grid7 .day{padding:5px}.rate{flex-wrap:wrap}.rate button{flex-basis:40%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+
+/* Midnight garden */
+:root{color-scheme:dark;--g0:#202c27;--g1:#19231f;--g2:#83a78c;--g3:#528468;--g4:#b5d2a0;--ink:#e0e9de;--paper:#142018;--line:#2e3d33;--muted:#a0b19e}
+body{background:#111a16;color:var(--ink)}aside{background:#151f19;border-color:var(--line)}.logo,h1,.card h3,.timer{color:#deebd3}.logo small,nav h6{color:#8fa38b}nav a{color:#a6b5a1}nav .nav-icon{color:#8ca480}nav a:hover{background:#26362a;color:#e0edd7}nav a.on{background:#304932;color:#e1f1d4}nav a.on .nav-icon{color:#bbd8a1}
+.card{background:#19241d;border-color:var(--line);box-shadow:0 8px 30px #0000000b}.mut,.quote,.today-intro .quote,.task-count{color:#a2b29c}.eyebrow,.section-label span{color:#8fa888}
+input,select,textarea,button{color:var(--ink);background:#202f24;border-color:#3a4d3d}input::placeholder,textarea::placeholder{color:#96a28f}button:hover{background:#314934}.btn{background:#bad3a2;color:#1a2a1b}.btn:hover{background:#d0e4bd}input:focus,select:focus,textarea:focus,button:focus-visible{outline-color:#bed7a6}
+.task{border-color:#2b3a2e}.chip{background:#293a2c;color:#b8c9aa}.chip.due{background:#3d3825;color:#e0cb92}.chip.due.late{background:#49312a;color:#f0bca1}.chk{border-color:#6b8561}.done .chk{background:#b3cb98;color:#192419}.ib{color:#a9b49b}.ib:hover,.ib.on{background:#344b33;color:#d5e8bb}
+.star{background:linear-gradient(130deg,#273626,#1e2c22);border-color:#3a4d32}.star b{color:#b9c895}.star b:before{color:#d6c48a}.day{background:#1c281f;border-color:#344431}.day.now{background:#2a3a28;outline-color:#a9c28c}.day h4{color:#bfd2ab}.ev{background:#354c35;color:#d6e6c6}.mo{background:#202d22;border-color:#384a34}.mo.now{outline-color:#abc392}.ni.on{background:#344d33;color:#e2edda}.md,.fcard{background:#142018;border-color:#374a32}.md pre,.md code{background:#ffffff0c}.rate .r1,.rate .r2,.rate .r3{color:#101b13}.rate .r4{color:var(--ink);border-color:#9eb98c}.rate .sug{outline-color:#d9e7cd}.meter{background:#2e3e2b}.meter i{background:#adc98e}.counts,summary{color:#b7caa6}.bc em{color:#a6b59c}.bc i{background:#9ebd83}.ok{background:#446a47;color:#f0f7e8}.miss{background:#453c2b;text-decoration-color:#f0c882}#toast,#down{background:#344d32!important;color:#eef5e5!important}
+.kmap{background:#101e1a;border:1px solid #384d36;box-shadow:0 24px 70px #0003}.plot{fill:transparent;stroke:transparent;stroke-width:2;cursor:pointer}.plot:hover,.plot:focus-visible{fill:#cbe7a91a;stroke:#bddb9b;outline:0}.plot.selected{stroke:#e8cf8d;fill:#e8cf8d14}.kbtn{gap:12px;background:#202e23;padding:10px;border-color:#344734}.kbtn.sel{background:#3d5635;color:#f1f7e7;border-color:#aeca8d}.kthumb{width:60px;height:60px;flex-shrink:0;background:#18281e;border-radius:9px}.kcopy{flex:1}.kcost{color:#e4ca8f;white-space:nowrap}.kingdom-banner{margin:8px 0 22px;color:#a3b69c}.occ-field{display:flex;flex-direction:column;gap:5px;color:#b0bfa6;font-size:11px}.occ-field input,.occ-field select{font-size:13px}.occ-form{align-items:flex-end}.occ-field.year input{width:145px}.occ-help{font-size:12px;color:#9daf94;margin:12px 0 0}.kmap .water-ripple{animation:riverDrift 6s ease-in-out infinite alternate}.kmap .hearth{animation:hearthGlow 4s ease-in-out infinite alternate}.kmap .wind-sails{transform-box:fill-box;transform-origin:center;animation:sailTurn 35s linear infinite}@keyframes riverDrift{to{transform:translateY(6px);opacity:.4}}@keyframes hearthGlow{to{opacity:.6}}@keyframes sailTurn{to{transform:rotate(360deg)}}
+@media(max-width:480px){.occ-field{flex:1 1 110px}.occ-field.year input{width:100%}.kthumb{width:48px;height:48px}.section-label{align-items:flex-start;flex-direction:column;gap:4px}}
+
+
+.daily-quests{padding:28px;background:linear-gradient(130deg,#1d2c20,#19241d)}.daily-quests .quest-eyebrow{color:#bbcdab;font-size:10px;letter-spacing:1.6px}.daily-quests h2{font:400 clamp(25px,2.5vw,33px)/1.25 Georgia,serif;color:#dfecd4;letter-spacing:-.6px;margin:19px 0 7px}.quest-intro{margin:0 0 12px}.quest-row{display:flex;align-items:center;gap:14px;border-bottom:1px solid #30412f;padding:17px 0}.quest-copy{flex:1;min-width:0}.quest-name{font-weight:500;overflow-wrap:anywhere}.quest-copy small{display:block;color:#a2b499;font-size:12px;margin-top:4px}.quest-focus{background:transparent;border-color:#40573b;white-space:nowrap}.quest-focus span{color:#bcd69e;margin-left:8px}.quest-done .chk{background:#b3cb98;color:#192419}.quest-done .quest-name{text-decoration:line-through;color:#9db190}.quest-finished{font-size:12px;color:#bad3a2;white-space:nowrap}.quest-add{display:block;width:100%;text-align:left;background:transparent;border:1px dashed #43553a;margin:16px 0;padding:15px;color:#c0cfb0}.quest-add>span{color:#dcc28a;font-size:18px;margin-right:8px}.quest-add small{display:block;margin:3px 0 0 27px;font-size:12px;color:#9fb094}.quest-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;font-size:12px;color:#b2c3a4}.quest-goal-label{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.quest-goal-label select{font-size:12px;min-height:34px;padding:6px 9px}.quest-savings{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid #344730}.quest-savings svg{width:68px;height:68px;flex-shrink:0}.quest-savings>div{flex:1;min-width:0}.quest-savings .row{font-size:12px;color:#d6e2c7;gap:4px}.quest-savings .meter{margin:9px 0}.quest-savings small,.quest-note{font-size:12px;color:#a4b59a}.quest-note{margin-bottom:0}.quest-savings button{font-size:12px;white-space:nowrap}
+@media(max-width:540px){.daily-quests{padding:20px}.quest-row{gap:10px;flex-wrap:wrap}.quest-copy{flex-basis:calc(100% - 45px)}.quest-row .quest-focus,.quest-row .quest-finished{margin-left:32px}.quest-row .ib{margin-left:auto}.quest-savings{flex-wrap:wrap}.quest-savings svg{width:52px;height:52px}.quest-savings>div{flex-basis:calc(100% - 70px)}.quest-savings>button{margin-left:66px}.quest-goal-label select{max-width:100%}}
+
+</style>
+</head>
+<body>
+<div class="app"><aside><div class="logo">♛ Dynasty<small>A little progress, every day</small></div><nav id="nav"></nav></aside><main id="main"></main></div>
+<div id="toast"></div>
+<div id="down" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9;background:var(--g4);color:var(--paper);padding:10px 16px;text-align:center;font-weight:600">Dynasty’s server isn’t running, so nothing you do is being saved. Start it again and this message clears by itself.</div>
+<script src="/katex.js"></script>
+<script>
+const SPACES=["University","Career & LeetCode","Personal"];
+const QUOTES=["It won’t happen overnight, but if you quit, it won’t happen at all","Small steps still move you forward","Do the next right thing","Progress beats perfection","Start before you feel ready","You are just as much of a person as anyone else, and have already earned love, because you never had to earn it in the first place"];
+const DEF={review_time:"18:00",review_scope:"lecture",review_offset:"0",lead:"10",new_per_day:"20",rev_per_day:"200",study_mode:"type",heading_cards:"1"};
+const S={tasks:[],events:[],modules:[],notes:[],goals:[],habits:[],habit_logs:[],sessions:[],settings:[],occasions:[],cards:[],reviews:[],kingdom:[],trash:[]};
+const UI={showDone:false,fSpace:"",fPrio:"",fMod:"",nmod:"",cmod:"",imod:"auto",cal:new Date(),sel:"",wk:0,uw:0,note:null,kb:null,kp:null,f:{mode:"down",mins:25,run:false,acc:0,startAt:0,task:""}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const hm=d=>pad(d.getHours())+":"+pad(d.getMinutes());
+const stamp=()=>{const d=new Date();return ymd(d)+"T"+hm(d)};
+const TODAY=()=>ymd(new Date());
+const dueDay=t=>t.due?t.due.slice(0,10):"";
+const RANK={High:0,Medium:1,Low:2};
+const cfg=k=>{const r=S.settings.find(x=>x.name===k);return r?r.val:DEF[k]};
+const toast=(m,keep)=>{const t=$("#toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);if(!keep)toast.h=setTimeout(()=>t.style.display="none",m.length>70?7000:3500)};
+let DOWN=false,NATIVE=false;
+function setDown(v){if(v===DOWN)return;DOWN=v;const e=$("#down");if(e)e.style.display=v?"block":"none";if(!v)recover()}
+async function recover(){try{Object.assign(S,await (await fetch("/api/all")).json());render()}catch(e){}}
+async function api(m,p,b){
+  try{const r=await fetch("/api/"+p,{method:m,headers:{"Content-Type":"application/json"},body:b?JSON.stringify(b):undefined});const j=await r.json();setDown(false);return j}
+  catch(e){setDown(true);return null}
+}
+async function add(t,d){const r=await api("POST",t,d);if(!r)return null;if(Array.isArray(r))S[t].push(...r);else S[t].push(r);return r}
+async function upd(t,id,d){Object.assign(S[t].find(x=>x.id===id),d);return api("PUT",t+"/"+id,d)}
+async function del(t,id){S[t]=S[t].filter(x=>x.id!==id);return api("DELETE",t+"/"+id)}
+async function setCfg(k,v){const r=S.settings.find(x=>x.name===k);if(r){r.val=v;api("PUT","settings/"+r.id,{val:v})}else{const n=await api("POST","settings",{name:k,val:v});if(n)S.settings.push(n)}}
+const sortT=(a,b)=>(a.due||"9").localeCompare(b.due||"9")||a.title.localeCompare(b.title);
+function fmtDue(s){const d=new Date(s.length>10?s:s+"T00:00");return d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})+(s.length>10?" "+s.slice(11,16):"")}
+
+/* ---------- components ---------- */
+function taskRow(t){
+  const late=t.due&&dueDay(t)<TODAY()&&!t.done;
+  return `<div class="task ${t.done?"done":""}"><button class="chk" data-act="done" data-id="${t.id}" aria-label="Complete">${t.done?"✓":""}</button>
+  <div class="tt"><div class="tn" data-act="rename" data-id="${t.id}" title="Click to rename">${esc(t.title)}</div>
+  <div class="chips"><span class="chip">${esc(t.space)}${t.module?" · "+esc(t.module):""}</span>${t.due?`<span class="chip due ${late?"late":""}">${esc(fmtDue(t.due))}</span>`:""}</div></div>
+  <button class="ib ${t.star?"on":""}" data-act="star" data-id="${t.id}" title="Top 3 star">★</button>
+  <button class="ib ${t.today?"on":""}" data-act="today" data-id="${t.id}" title="Add to today">☀</button>
+  <button class="ib" data-act="del" data-id="${t.id}" title="Delete">✕</button></div>`;
+}
+function taskList(arr,empty){
+  const open=arr.filter(t=>!t.done).sort(sortT),done=arr.filter(t=>t.done);
+  return `<div class="card">${open.length?open.map(taskRow).join(""):`<p class="mut">${empty||"Nothing open. Add a task above."}</p>`}
+  ${done.length?`<details><summary>Completed (${done.length})</summary>${done.map(taskRow).join("")}</details>`:""}</div>`;
+}
+function addForm(o){
+  o=o||{};
+  const showMod=!o.module&&(!o.space||o.space==="University")&&S.modules.length;
+  return `<form class="add" data-form="task" data-today="${o.today?1:0}" data-space="${esc(o.space||"")}" data-module="${esc(o.module||"")}">
+  <input name="title" placeholder="Add a task" required>
+  ${o.space?"":`<select name="space">${SPACES.map(s=>`<option>${esc(s)}</option>`).join("")}</select>`}
+  ${showMod?`<select name="module"><option value="">No module</option>${S.modules.map(m=>`<option>${esc(m.code)}</option>`).join("")}</select>`:""}
+  <input type="datetime-local" name="due" title="Due (optional, used for reminders)">
+  <button class="btn">Add task</button></form>`;
+}
+const evLine=e=>`<div class="ev">${esc(e.starts.slice(11,16))}–${esc(e.ends.slice(11,16))} ${esc(e.title)}${e.location?" @ "+esc(e.location):""}</div>`;
+const dayItems=day=>S.events.filter(e=>e.starts.slice(0,10)===day).sort((a,b)=>a.starts.localeCompare(b.starts));
+const dayTasks=day=>S.tasks.filter(t=>dueDay(t)===day).sort(sortT);
+const miniTask=t=>`<div class="${t.done?"mut":""}" style="${t.done?"text-decoration:line-through":""}">• ${esc(t.title)}</div>`;
+
+/* ---------- views ---------- */
+const isDailyQuest=t=>t.star&&(!t.done||(t.done_at||"").slice(0,10)===TODAY());
+const dailyQuests=()=>S.tasks.filter(isDailyQuest).slice(0,3);
+function dailyQuestCard(){
+  const quests=dailyQuests(),done=quests.filter(t=>t.done).length,goal=CAT.find(c=>c.k===cfg("kingdom_goal")),gold=Math.max(0,spendable()),level=titleOf(earnedGold()).n;
+  const choices=CAT.filter(c=>c.lvl<=level&&(!c.max||S.kingdom.filter(b=>b.kind===c.k).length<c.max));
+  const options=[...choices];if(goal&&!options.includes(goal))options.push(goal);
+  const rows=quests.map(t=>`<div class="quest-row ${t.done?'quest-done':''}"><button class="chk" data-act="done" data-id="${t.id}" aria-label="${t.done?'Reopen':'Complete'} ${esc(t.title)}" aria-pressed="${!!t.done}">${t.done?'✓':''}</button><div class="quest-copy"><span class="quest-name">${esc(t.title)}</span><small>${esc(t.space||'Personal')}${t.module?' · '+esc(t.module):''}${t.due?' · '+esc(fmtDue(t.due)):''}</small></div>${!t.done?`<button class="quest-focus" data-act="questfocus" data-id="${t.id}" aria-label="Focus on ${esc(t.title)}">Focus <span aria-hidden="true">↗</span></button>`:'<span class="quest-finished">Complete ✓</span>'}<button class="ib" data-act="star" data-id="${t.id}" aria-label="Remove ${esc(t.title)} from daily quests" title="Remove from daily quests">✕</button></div>`).join('');
+  const empty=quests.length<3?`<button class="quest-add" data-act="goto" data-to="tasks"><span aria-hidden="true">✧</span> ${quests.length?'Choose another quest':'Choose your first quest'} <small>Star a task to add it here · ${3-quests.length} slot${quests.length===2?'':'s'} open</small></button>`:'';
+  return `<section class="card daily-quests" aria-label="Daily quests"><div class="section-label"><span class="quest-eyebrow">Your daily quests</span><span>Make room for what matters</span></div><h2>${goal?'A little closer to your '+esc(goal.n.toLowerCase())+'.':'Three small steps. A little progress.'}</h2><p class="mut quest-intro">${quests.length&&done===quests.length?'Your chosen quests are complete. Take a moment to enjoy it.':'Turn your top three tasks into a small daily quest.'}</p>${rows}${empty}<div class="quest-footer"><span aria-live="polite">${done} of ${quests.length} complete</span><label class="quest-goal-label">Saving for <select data-f="questGoal" aria-label="Choose a Kingdom savings goal"><option value="">Choose a building</option>${options.map(c=>`<option value="${c.k}" ${goal&&goal.k===c.k?'selected':''}>${esc(c.n)} · ${c.c} gold</option>`).join('')}</select></label></div>${goal?`<div class="quest-savings"><svg viewBox="0 0 100 100" aria-hidden="true">${ART[goal.k]()}</svg><div><div class="row"><span>${esc(goal.n)} savings</span><span>${gold} / ${goal.c} gold</span></div><div class="meter" role="progressbar" aria-label="${esc(goal.n)} savings" aria-valuemin="0" aria-valuemax="${goal.c}" aria-valuenow="${Math.min(gold,goal.c)}"><i style="width:${Math.min(100,gold/goal.c*100)}%"></i></div><small>${gold>=goal.c?'Ready to build in your Kingdom.':(goal.c-gold)+' more gold to go · earned through focus sessions'}</small></div><button data-act="goto" data-to="${gold>=goal.c?'kingdom':'focus'}">${gold>=goal.c?'Build ↗':'Earn gold ↗'}</button></div>`:'<p class="quest-note">Focus sessions earn gold for your Kingdom. Choose a building above to track your savings.</p>'}</section>`;
+}
+
+function vToday(){
+  const d=new Date(),h=d.getHours(),t0=TODAY();
+  const fcN=S.cards.filter(isDue).length,fcCard=fcN?`<div class="card row"><span><b>${fcN}</b> flashcard${fcN>1?"s":""} due</span><button class="btn" data-act="gostudy" data-id="all">Study now</button></div>`:"",g=greet(),sp=specials(t0),spCard=sp.length?`<div class="card"><h3>Today</h3>${sp.map(o=>`<div>${esc(occText(o,t0))}</div>`).join("")}</div>`:"";
+  const f=t=>(!UI.fSpace||t.space===UI.fSpace);
+  const all=S.tasks.filter(t=>t.today||dueDay(t)===t0);
+  const list=all.filter(t=>(UI.showDone||!t.done)&&f(t)).sort(sortT);
+  const earlier=S.tasks.filter(t=>!t.done&&dueDay(t)&&dueDay(t)<t0&&!all.includes(t)).sort(sortT);
+  const sel=(k,opts,v,label)=>`<select data-f="${k}"><option value="">${label}</option>${opts.map(o=>`<option ${o===v?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  const notif=(!NATIVE&&"Notification" in window&&Notification.permission==="default")?`<div class="card row"><span>Turn on reminders for due tasks and lectures.</span><button class="btn" data-act="notif">Enable notifications</button></div>`:"";
+  return `<header class="today-intro"><div class="eyebrow">${d.toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"})}</div><h1 id="greet">${g}</h1><div class="quote">${QUOTES[d.getDate()%QUOTES.length]}</div></header>${notif}${spCard}${fcCard}
+  ${dailyQuestCard()}
+  <div class="card"><h3>Today’s constellation</h3><div class="task-count">${all.filter(t=>!t.done).length} open · ${all.filter(t=>t.done).length} complete</div>
+  ${addForm({today:1})}
+  <div class="add" style="margin:12px 0">${sel("space",SPACES,UI.fSpace,"All spaces")}
+  <label class="mut"><input type="checkbox" data-f="done" ${UI.showDone?"checked":""}> Show completed</label></div>
+  ${list.length?list.map(taskRow).join(""):`<p class="mut">Nothing planned for today. Add a task or tap ☀ on one from All Tasks.</p>`}
+  <h3 style="margin-top:14px">Still open from earlier (${earlier.length})</h3>${earlier.map(taskRow).join("")}</div>`;
+}
+function vWeek(){
+  const m=new Date();m.setDate(m.getDate()-((m.getDay()+6)%7)+UI.wk*7);
+  let cols="";
+  for(let i=0;i<7;i++){const d=new Date(m);d.setDate(m.getDate()+i);const k=ymd(d);
+    cols+=`<div class="day ${k===TODAY()?"now":""}"><h4>${d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"})}</h4>${specials(k).map(o=>`<div class="ev" style="background:var(--g2)">${esc(occText(o,k))}</div>`).join("")}${dayItems(k).map(evLine).join("")}${dayTasks(k).map(miniTask).join("")}</div>`}
+  return `<div class="row"><h1>This Week</h1><div><button data-act="wk" data-id="-1">‹</button> <button data-act="wk" data-id="0">This week</button> <button data-act="wk" data-id="1">›</button></div></div><div class="grid7">${cols}</div>`;
+}
+function vCal(){
+  const c=UI.cal,y=c.getFullYear(),mo=c.getMonth(),first=new Date(y,mo,1),lead=(first.getDay()+6)%7,n=new Date(y,mo+1,0).getDate();
+  let cells="";
+  for(let i=0;i<lead;i++)cells+="<div></div>";
+  for(let d=1;d<=n;d++){const k=y+"-"+pad(mo+1)+"-"+pad(d),ne=dayItems(k).length,nt=dayTasks(k).length,ns=specials(k).length;
+    cells+=`<div class="day cell ${k===TODAY()?"now":""} ${k===UI.sel?"sel":""}" data-act="day" data-day="${k}"><h4>${d}</h4>${ne?`<div><span class="dot"></span>${ne} class${ne>1?"es":""}</div>`:""}${nt?`<div><span class="dot" style="background:var(--g2)"></span>${nt} task${nt>1?"s":""}</div>`:""}${ns?`<div><span class="dot" style="background:var(--g4)"></span>${ns} occasion${ns>1?"s":""}</div>`:""}</div>`}
+  const sel=UI.sel?(()=>{const x=specials(UI.sel).map(o=>`<div class="ev" style="background:var(--g2)">${esc(occText(o,UI.sel))}</div>`).join("")+dayItems(UI.sel).map(evLine).join("")+dayTasks(UI.sel).map(taskRow).join("");return `<div class="card"><h3>${esc(fmtDue(UI.sel))}</h3>${x||'<span class="mut">Nothing on this day.</span>'}</div>`})():"";
+  return `<div class="row"><h1>${c.toLocaleDateString("en-GB",{month:"long",year:"numeric"})}</h1><div><button data-act="cal" data-id="-1">‹</button> <button data-act="cal" data-id="0">Today</button> <button data-act="cal" data-id="1">›</button></div></div>
+  <div class="grid7 mut" style="margin:8px 0">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(x=>`<div>${x}</div>`).join("")}</div><div class="grid7">${cells}</div>${sel}`;
+}
+function vTasks(){
+  const arr=S.tasks.filter(t=>(!UI.fSpace||t.space===UI.fSpace)&&(!UI.fMod||t.module===UI.fMod));
+  return `<h1>All Tasks</h1><div class="card">${addForm()}</div>
+  <div class="add"><select data-f="space"><option value="">All spaces</option>${SPACES.map(s=>`<option ${s===UI.fSpace?"selected":""}>${esc(s)}</option>`).join("")}</select>
+  <select data-f="mod"><option value="">All modules</option>${S.modules.map(m=>`<option ${m.code===UI.fMod?"selected":""}>${esc(m.code)}</option>`).join("")}</select></div>${taskList(arr)}${trashCard()}`;
+}
+/* ---------- flashcards ---------- */
+const MIN=6e4,DAY=864e5,STEPS=[1,10],RSTEPS=[10];
+const inl0=s=>esc(s).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>").replace(/(^|[^*])\*([^*\n]+)\*/g,"$1<i>$2</i>").replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+const addDays=(ms,d)=>{const x=new Date(ms);x.setDate(x.getDate()+d);return x.getTime()};
+const dayStart=ms=>{const x=new Date(ms-4*36e5);x.setHours(4,0,0,0);return x.getTime()};
+const sday=()=>ymd(new Date(Date.now()-4*36e5));
+const nz=s=>String(s||"").toLowerCase().replace(/[*_`]/g,"").replace(/\s+/g," ").trim();
+const plain=s=>String(s||"").replace(/!\[[^\]]*\]\([^)]*\)/g,"").replace(/\[([^\]]+)\]\([^)]*\)/g,"$1").replace(/^\s*[-*+]\s+/,"").trim();
+const SKIP=/^(note|notes|example|e\.?g\.?|important|warning|tip|summary|remember|proof|todo|nb|caution|definition|solution|answer|question)$/i;
+
+/* markdown -> flashcards (works offline) */
+function mdCards(note){
+  const L=String(note.body||"").replace(/\r/g,"").split("\n"),out=[],keys=new Set(),secs=[];
+  const push=(kind,front,back,answer)=>{front=(front||"").trim();back=(back||"").trim();if(!front||!back)return false;const k=kind+":"+nz(front);if(keys.has(k))return false;keys.add(k);out.push({kind,front,back,answer:(answer||back).trim(),ckey:k});return true};
+  const QRE=/^\s*(?:[-*]\s*)?\**(?:Q|Question)\s*[:.]\**\s*(.+)$/i,ARE=/^\s*(?:[-*]\s*)?\**(?:A|Answer)\s*[:.]\**\s*(.*)$/i;
+  let sec=null,fence=false;
+  const open=(title,level)=>{sec={title,level,body:[],cards:0};secs.push(sec)};
+  for(let i=0;i<L.length;i++){
+    const line=L[i];
+    if(/^\s*(```|~~~)/.test(line)){fence=!fence;continue}
+    if(fence)continue;
+    const hm=line.match(/^(#{1,6})\s+(.*?)\s*#*\s*$/);
+    if(hm){open(plain(hm[2]),hm[1].length);continue}
+    if(!sec)open(note.title||"Notes",0);
+    let m=line.match(QRE);
+    if(m){
+      let q=m[1],j=i+1;
+      while(j<L.length&&L[j].trim()&&!ARE.test(L[j])&&!/^#/.test(L[j])){q+="\n"+L[j].trim();j++}
+      const am=j<L.length&&L[j].match(ARE);
+      if(am){let a=am[1];j++;
+        while(j<L.length&&L[j].trim()&&!QRE.test(L[j])&&!/^#/.test(L[j])){a+="\n"+L[j].trim();j++}
+        if(push("qa",plain(q),plain(a)))sec.cards++;
+        i=j-1;continue}
+    }
+    if(/\{\{c\d+::/.test(line)){
+      [...new Set([...line.matchAll(/\{\{c(\d+)::/g)].map(x=>x[1]))].forEach(num=>{
+        const ans=[];
+        const front=line.replace(/\{\{c(\d+)::(.+?)(?:::(.+?))?\}\}/g,(_,k,t,h)=>{if(k===num){ans.push(t);return h?"[…"+h+"]":"[…]"}return t});
+        const back=line.replace(/\{\{c\d+::(.+?)(?:::.+?)?\}\}/g,"$1");
+        if(push("cloze",plain(front),plain(back),ans.join(", ")))sec.cards++;
+      });
+      continue}
+    m=line.match(/^\s*(?:[-*+]\s+)?([^:{}]{2,120}?)\s*::\s*(.+)$/);
+    if(m){if(push("qa",plain(m[1]),plain(m[2])))sec.cards++;continue}
+    const dm=line.match(/^(\s*)(?:[-*+]\s+|\d+[.)]\s+)?\*\*([^*]{2,60}?)(?:\*\*\s*[:：]|[:：]\*\*|\*\*\s+[–—-])\s*(.+)$/);
+    if(dm&&!SKIP.test(dm[2].trim())&&dm[3].length>=6){
+      let back=dm[3],j=i+1;const ind=dm[1].length;
+      while(j<L.length&&j<i+7&&L[j].trim()&&/^\s*/.exec(L[j])[0].length>ind&&!/^#/.test(L[j])){back+="\n"+plain(L[j]);j++}
+      if(push("qa","Define: "+dm[2].trim().replace(/[?:]$/,""),plain(back)))sec.cards++;
+      i=j-1;continue}
+    if(line.trim()&&!/^\s*(\||>?\s*\[Screenshot|!\[|-{3,}\s*$)/i.test(line))sec.body.push(line);
+  }
+  const titleSec=secs.find(x=>x.level>0&&x.level===1);
+  if(cfg("heading_cards")!=="0")secs.forEach(s=>{
+    if(s.cards||s.level===0||(s===titleSec&&s===secs.find(x=>x.level>0)))return;
+    const body=s.body.map(plain).filter(Boolean).join("\n");
+    if(body.length<15||body.length>500)return;
+    push("qa",/\?$|^(what|how|why|when|define|explain|describe)\b/i.test(s.title)?s.title:"Explain: "+s.title,body);
+  });
+  return out;
+}
+const newCard=(nid,g)=>({note_id:nid,front:g.front,back:g.back,answer:g.answer,kind:g.kind,ckey:g.ckey,state:0,step:0,interval:0,ease:2.5,reps:0,lapses:0,due:0,created:Date.now()});
+async function mergeCards(nid,gen){
+  const byKey=new Map(S.cards.filter(c=>c.note_id===nid).map(c=>[c.ckey,c])),fresh=[],ps=[];let updated=0;
+  gen.forEach(g=>{
+    const e=byKey.get(g.ckey);
+    if(!e){byKey.set(g.ckey,1);fresh.push(newCard(nid,g))}
+    else if(e!==1&&(e.back!==g.back||e.answer!==g.answer)){ps.push(upd("cards",e.id,{back:g.back,answer:g.answer}));updated++}
+  });
+  await Promise.all(ps);
+  if(fresh.length)await add("cards",fresh);
+  return{added:fresh.length,updated};
+}
+
+/* Anki-style scheduler. rating: 1 again, 2 hard, 3 good, 4 easy. state: 0 new, 1 learning, 2 review, 3 relearning */
+function sched(c,r,now){
+  const n=Object.assign({},c);n.reps=(c.reps||0)+1;
+  const re=c.state===3,steps=re?RSTEPS:STEPS;
+  const grad=d=>{n.state=2;n.step=0;n.interval=d;n.due=addDays(dayStart(now),d)};
+  if(c.state!==2){
+    const st=c.state===0?0:(c.step||0);
+    if(r===1){n.state=re?3:1;n.step=0;n.due=now+steps[0]*MIN}
+    else if(r===2){n.state=re?3:1;n.step=st;n.due=now+steps[st]*MIN}
+    else if(r===3){if(st+1>=steps.length)grad(re?Math.max(1,c.interval):1);else{n.state=re?3:1;n.step=st+1;n.due=now+steps[st+1]*MIN}}
+    else grad(re?Math.max(2,c.interval+1):4);
+    return n;
+  }
+  const ivl=Math.max(1,c.interval),late=Math.max(0,Math.floor((now-c.due)/DAY)),ease=c.ease;
+  if(r===1){n.lapses=(c.lapses||0)+1;n.ease=Math.max(1.3,ease-.2);n.state=3;n.step=0;n.interval=1;n.due=now+RSTEPS[0]*MIN;return n}
+  const hard=Math.max(ivl+1,Math.round((ivl+late/4)*1.2)),good=Math.max(hard+1,Math.round((ivl+late/2)*ease)),easy=Math.max(good+1,Math.round((ivl+late)*ease*1.3));
+  if(r===2){n.ease=Math.max(1.3,ease-.15);grad(hard)}else if(r===3)grad(good);else{n.ease=ease+.15;grad(easy)}
+  return n;
+}
+function fmtNext(n,now){
+  if(n.state===2){const d=n.interval;return d<31?d+"d":d<365?(d/30).toFixed(1)+"mo":(d/365).toFixed(1)+"y"}
+  const m=Math.round((n.due-now)/MIN);return m<60?Math.max(1,m)+"m":Math.round(m/60)+"h";
+}
+const isDue=c=>(c.state===1||c.state===3)?c.due<=Date.now():c.state===2?c.due<addDays(dayStart(Date.now()),1):false;
+function queue(deck){
+  const now=Date.now(),end=addDays(dayStart(now),1),today=sday();
+  const mm=noteMods(),cs=S.cards.filter(c=>inDeck(c,deck,mm)),rv=S.reviews.filter(r=>r.day===today);
+  const newLeft=Math.max(0,+cfg("new_per_day")-new Set(rv.filter(r=>r.prev_state===0).map(r=>r.card_id)).size);
+  const revLeft=Math.max(0,+cfg("rev_per_day")-rv.filter(r=>r.prev_state===2).length);
+  const lrn=c=>c.state===1||c.state===3;
+  return{
+    learn:cs.filter(c=>lrn(c)&&c.due<=now).sort((a,b)=>a.due-b.due),
+    ahead:cs.filter(c=>lrn(c)&&c.due>now&&c.due<=now+20*MIN).sort((a,b)=>a.due-b.due),
+    rev:cs.filter(c=>c.state===2&&c.due<end).sort((a,b)=>a.due-b.due||a.id-b.id).slice(0,revLeft),
+    fresh:cs.filter(c=>c.state===0).sort((a,b)=>a.id-b.id).slice(0,newLeft)};
+}
+async function rate(r){
+  const st=UI.st,c=st&&S.cards.find(x=>x.id===st.cur);if(!c)return;
+  const now=Date.now(),n=sched(c,r,now);
+  await upd("cards",c.id,{state:n.state,step:n.step,interval:n.interval,ease:n.ease,reps:n.reps,lapses:n.lapses,due:n.due});
+  await add("reviews",{card_id:c.id,day:sday(),rating:r,prev_state:c.state,ts:now});
+  st.done++;st.cur=null;st.phase="ask";st.typed="";st.score=null;
+}
+
+/* typed-answer checking */
+const STOP=new Set("a an the of to in on and or is are was were be been it its this that for with as by at from".split(" "));
+const toks=s=>nz(s).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+function lev(a,b){const m=a.length,n=b.length;let p=[...Array(n+1).keys()];for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function wordMatch(w,set){if(set.has(w))return true;if(w.length>=5)for(const x of set)if(Math.abs(x.length-w.length)<=1&&lev(w,x)<=1)return true;return false}
+function grade(typed,expected){
+  const T=toks(typed),E=toks(expected);
+  if(!T.length)return 0;
+  if(!E.length)return nz(typed)===nz(expected)?1:0;
+  if(T.join(" ")===E.join(" "))return 1;
+  const E2=E.filter(w=>!STOP.has(w)),T2=T.filter(w=>!STOP.has(w)),e=E2.length?E2:E,t=T2.length?T2:T,ts=new Set(t),es=new Set(e);
+  const rec=e.filter(w=>wordMatch(w,ts)).length/e.length,prec=t.filter(w=>wordMatch(w,es)).length/t.length;
+  return Math.round((0.8*rec+0.2*prec)*100)/100;
+}
+function diffHtml(typed,expected){
+  const ts=new Set(toks(typed));
+  return String(expected).split(/(\s+)/).map(w=>{if(!w.trim())return w;const t=toks(w);if(!t.length)return esc(w);return `<span class="${t.every(x=>wordMatch(x,ts))?"ok":"miss"}">${esc(w)}</span>`}).join("");
+}
+function checkAnswer(){const st=UI.st,c=st&&S.cards.find(x=>x.id===st.cur);if(!c)return;const a=$("#ans");st.typed=a?a.value:"";st.score=grade(st.typed,c.answer||c.back);st.phase="graded"}
+
+const MATHRE=/\$\$([\s\S]+?)\$\$|\$(?!\s)((?:\\.|[^$\\\n])+?)(?<!\s)\$(?!\d)/g;
+function texHtml(expr,display){
+  if(typeof katex==="undefined")return esc((display?"$$":"$")+expr+(display?"$$":"$"));
+  try{return katex.renderToString(expr,{displayMode:display,throwOnError:false,output:"html",strict:"ignore"})}catch(e){return esc(expr)}
+}
+function inl(s){
+  s=String(s==null?"":s);let out="",last=0,m;MATHRE.lastIndex=0;
+  while((m=MATHRE.exec(s))){out+=inl0(s.slice(last,m.index))+(m[1]!==undefined?texHtml(m[1].trim(),true):texHtml(m[2],false));last=m.index+m[0].length}
+  return out+inl0(s.slice(last));
+}
+function chunkNote(body){
+  const parts=[];let cur="";
+  String(body).split(/\n(?=#{1,3}\s)/).forEach(sec=>{if(cur&&(cur+sec).length>4500){parts.push(cur);cur=""}cur+=(cur?"\n":"")+sec;while(cur.length>6000){parts.push(cur.slice(0,5000));cur=cur.slice(5000)}});
+  if(cur.trim())parts.push(cur);return parts.length?parts:[String(body)];
+}
+async function refreshAI(){
+  if(UI.aiAt&&Date.now()-UI.aiAt<4000)return;UI.aiAt=Date.now();
+  try{UI.ai=await (await fetch("/api/ai-status")).json()}catch(e){UI.ai=null}
+  if(location.hash==="#settings")render();
+}
+
+/* ---------- Notion export import (zip or folder) ---------- */
+const NOTION_ID=/[\s-]+[0-9a-f]{32}$/i;
+const stripId=s=>s.replace(NOTION_ID,"").trim();
+function matchMod(name){
+  const low=name.toLowerCase();
+  return modList().filter(m=>{const ml=m.toLowerCase();return low===ml||(ml.length>=4&&low.includes(ml))||(low.length>=4&&ml.includes(low))}).sort((a,b)=>b.length-a.length)[0]||"";
+}
+function notionItems(entries){
+  return entries.map(e=>{
+    const segs=e.path.split("/").filter(Boolean),file=segs.pop(),stem=stripId(file.replace(/\.(md|markdown)$/i,""));
+    const folders=segs.map(stripId).filter(s=>s&&!/^(export[-_ ].*|private\s*&\s*shared|shared|private)$/i.test(s));
+    const body=String(e.text||"").replace(/^\uFEFF/,""),h1=(body.match(/^#\s+(.+)$/m)||[])[1];
+    return{path:e.path,folders,folder:"",stem,title:(h1||stem).trim(),body};
+  });
+}
+function startReview(entries){
+  const items=notionItems(entries).filter(i=>i.body.trim().length>=5);
+  if(!items.length)return toast("No markdown notes found in that export");
+  const tops=new Set(items.map(i=>i.folders[0]).filter(Boolean));
+  items.forEach(i=>{i.folder=i.folders[0]||"";if(!i.folder&&tops.has(i.stem))i.folder=i.stem});
+  const names=[...new Set(items.map(i=>i.folder))].sort((a,b)=>a.localeCompare(b));
+  UI.imp={items,opts:{props:true,toggles:false},groups:names.map(f=>({folder:f,count:items.filter(i=>i.folder===f).length,map:f?(matchMod(f)||"__new"):"auto"}))};
+  render();window.scrollTo(0,0);
+}
+function cleanNotion(md,o){
+  let t=String(md).replace(/^\uFEFF/,"").replace(/\r/g,"");
+  if(o.props){
+    const L=t.split("\n");let i=/^#\s/.test(L[0]||"")?1:0;
+    while(i<L.length&&!L[i].trim())i++;
+    let j=i;const PROP=/^(created(?: time| by| at)?|last edited(?: time| by)?|last updated|updated at|tags|status|date|type|class|course|module|url|property)\s*:.*$/i;
+    while(j<L.length&&PROP.test(L[j]))j++;
+    if(j>i)L.splice(i,j-i);
+    t=L.join("\n");
+  }
+  t=t.replace(/<aside>\s*([\s\S]*?)\s*<\/aside>/gi,(m,x)=>x.trim().split("\n").map(l=>"> "+l.trim()).join("\n")+"\n");
+  for(let k=0;k<3;k++)t=t.replace(/<details[^>]*>\s*<summary>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/gi,(m,s,b)=>{
+    s=s.replace(/<[^>]+>/g,"").trim();b=b.trim();
+    return o.toggles?"Q: "+s+"\nA: "+b.replace(/\n{2,}/g,"\n")+"\n":"**"+s+"**\n\n"+b+"\n"});
+  t=t.replace(/!\[([^\]]*)\]\(([^)]*)\)/g,(m,alt,src)=>{
+    if(/^https?:/i.test(src))return m;
+    let name=alt;if(!name){try{name=decodeURIComponent(src.split("/").pop()||"image")}catch(e){name="image"}}
+    return"> [Screenshot: "+name.replace(/\.(png|jpe?g|gif|webp|svg)$/i,"")+"]"});
+  t=t.replace(/(^|[^!])\[([^\]]+)\]\((?!https?:|mailto:|#)[^)]*\)/g,"$1$2");
+  t=t.replace(/<br\s*\/?>/gi,"\n").replace(/<\/?(?:u|mark|span|div|p|font|sup|sub|center|b|i|strong|em)\b[^>]*>/gi,"");
+  return t.replace(/\n{3,}/g,"\n\n").trim()+"\n";
+}
+function impPanel(){
+  const imp=UI.imp,mods=modList();
+  const opt=(g,v,l)=>`<option value="${esc(v)}" ${g.map===v?"selected":""}>${esc(l)}</option>`;
+  const rows=imp.groups.map((g,i)=>`<div class="task" style="justify-content:space-between"><div class="tt"><div class="tn" style="cursor:default">${esc(g.folder||"Pages not in a folder")}</div><div class="mut">${g.count} note${g.count>1?"s":""}</div></div><select data-f="impmap" data-g="${i}">${g.folder?"":opt(g,"auto","Detect from title")}${opt(g,"","No module")}${g.folder?opt(g,"__new","New module: "+g.folder):""}${mods.map(m=>opt(g,m,m)).join("")}</select></div>`).join("");
+  return `<div class="card"><h3>Import review</h3><p style="margin-top:0">Found <b>${imp.items.length}</b> notes in <b>${imp.groups.length}</b> group${imp.groups.length>1?"s":""}. Choose a module for each folder, then import.</p>${rows}
+  <div class="add" style="margin:12px 0"><label><input type="checkbox" data-f="impopt" data-k="props" ${imp.opts.props?"checked":""}> Remove Notion property lines</label><label><input type="checkbox" data-f="impopt" data-k="toggles" ${imp.opts.toggles?"checked":""}> Turn toggles into question/answer cards</label></div>
+  <div class="add"><button class="btn" data-act="impgo">Import ${imp.items.length} notes</button><button data-act="impcancel">Cancel</button></div></div>`;
+}
+async function runImport(){
+  const imp=UI.imp;if(!imp||UI.busy)return;UI.busy=true;
+  try{
+    toast("Importing…",true);
+    const todo=imp.items.map(it=>{const g=imp.groups.find(x=>x.folder===it.folder);let mod=g.map;
+      if(mod==="__new")mod=g.folder;else if(mod==="auto")mod=importModule(it.title,it.stem);return{it,mod:mod||""}});
+    const newMods=[...new Set(todo.map(t=>t.mod).filter(m=>m&&!S.modules.some(x=>x.code===m)))];
+    if(newMods.length)await add("modules",newMods.map(m=>({code:m,name:""})));
+    const notes=[],seen=new Set();let skipped=0;
+    todo.forEach(t=>{const key=t.it.title+"|"+t.mod;
+      if(seen.has(key)||S.notes.some(n=>n.title===t.it.title&&(n.module||"")===t.mod)){skipped++;return}
+      seen.add(key);notes.push({title:t.it.title,body:cleanNotion(t.it.body,imp.opts),module:t.mod,updated:new Date().toISOString()})});
+    const made=notes.length?((await add("notes",notes))||[]):[];
+    const cards=[];made.forEach(n=>mdCards(n).forEach(g=>cards.push(newCard(n.id,g))));
+    if(cards.length)await add("cards",cards);
+    UI.imp=null;if(made.length)UI.note=made[0].id;
+    toast(`Imported ${made.length} notes and made ${cards.length} flashcards`+(skipped?` (${skipped} already imported)`:"")+(newMods.length?`. New modules: ${newMods.join(", ")}`:""));
+  }finally{UI.busy=false}
+}
+async function readZip(file){
+  toast("Reading the export…",true);
+  try{
+    const r=await fetch("/api/import-zip",{method:"POST",body:await file.arrayBuffer()});
+    const j=await r.json();if(!j.files||!j.files.length)return toast("No markdown files found in that zip");
+    startReview(j.files);toast(j.files.length+" notes found. Check the review below.");
+  }catch(e){toast("Couldn’t read that zip. Is the Dynasty server running?")}
+}
+async function readFolder(files){
+  const md=[...files].filter(f=>/\.(md|markdown)$/i.test(f.name));
+  if(!md.length)return toast("No .md files in that folder");
+  startReview(await Promise.all(md.map(async f=>({path:f.webkitRelativePath||f.name,text:await f.text()}))));
+}
+
+/* markdown preview */
+function mdHtml(src){
+  const out=[];let list=null,fence=null,para=[];
+  const flush=()=>{if(para.length){out.push("<p>"+inl(para.join(" "))+"</p>");para=[]}};
+  const endList=()=>{if(list){out.push("</"+list+">");list=null}};
+  String(src).replace(/\r/g,"").replace(/\$\$([\s\S]+?)\$\$/g,(m,x)=>"$$"+x.replace(/\s*\n\s*/g," ")+"$$").split("\n").forEach(line=>{
+    if(/^\s*```/.test(line)){if(fence===null){flush();endList();fence=[]}else{out.push("<pre>"+esc(fence.join("\n"))+"</pre>");fence=null}return}
+    if(fence){fence.push(line);return}
+    let m;
+    if(m=line.match(/^(#{1,6})\s+(.*)$/)){flush();endList();out.push(`<h${m[1].length}>${inl(m[2])}</h${m[1].length}>`)}
+    else if(m=line.match(/^\s*[-*+]\s+(.*)$/)){flush();if(list!=="ul"){endList();out.push("<ul>");list="ul"}out.push("<li>"+inl(m[1])+"</li>")}
+    else if(m=line.match(/^\s*\d+[.)]\s+(.*)$/)){flush();if(list!=="ol"){endList();out.push("<ol>");list="ol"}out.push("<li>"+inl(m[1])+"</li>")}
+    else if(m=line.match(/^>\s?(.*)$/)){flush();endList();out.push("<blockquote>"+inl(m[1])+"</blockquote>")}
+    else if(!line.trim()){flush();endList()}
+    else para.push(line.trim());
+  });
+  flush();endList();if(fence)out.push("<pre>"+esc(fence.join("\n"))+"</pre>");
+  return out.join("");
+}
+
+/* views */
+/* ---------- modules for notes and flashcards ---------- */
+function modList(){
+  const known=S.modules.map(m=>m.code).filter(Boolean).sort((a,b)=>a.localeCompare(b));
+  const extra=[...new Set(S.notes.map(n=>n.module||"").filter(m=>m&&!known.includes(m)))].sort();
+  return known.concat(extra);
+}
+function modGroups(notes){
+  const g=modList().map(m=>({key:m,name:m,notes:notes.filter(n=>(n.module||"")===m)}));
+  g.push({key:"",name:"No module",notes:notes.filter(n=>!(n.module||""))});
+  return g.filter(x=>x.notes.length);
+}
+const modOpts=(sel,all)=>`<option value="">${all}</option>`+modList().map(m=>`<option ${m===sel?"selected":""}>${esc(m)}</option>`).join("")+`<option value="__none" ${sel==="__none"?"selected":""}>No module</option>`;
+const inFilter=(n,f)=>!f||(f==="__none"?!(n.module||""):(n.module||"")===f);
+const noteMods=()=>new Map(S.notes.map(n=>[n.id,n.module||""]));
+function inDeck(c,deck,mm){
+  if(deck==="all")return true;deck=String(deck);
+  if(deck.startsWith("m:")){mm=mm||noteMods();return(mm.get(c.note_id)||"")===deck.slice(2)}
+  return c.note_id===+deck;
+}
+const newNoteModule=()=>UI.nmod&&UI.nmod!=="__none"?UI.nmod:"";
+function importModule(title,fname){
+  if(UI.imod==="")return"";
+  if(UI.imod!=="auto")return UI.imod;
+  const hay=(fname+" "+title).toLowerCase();
+  const hit=modList().filter(c=>hay.includes(c.toLowerCase())).sort((a,b)=>b.length-a.length)[0];
+  return hit||newNoteModule();
+}
+function vNotes(){
+  const vis=S.notes.filter(n=>inFilter(n,UI.nmod)).sort((a,b)=>(b.updated||"").localeCompare(a.updated||""));
+  const cur=S.notes.find(n=>n.id===UI.note)||vis[0]||S.notes[0];
+  let right='<p class="mut">No notes yet. Import .md files or create a note.</p>';
+  if(cur){
+    const cs=S.cards.filter(c=>c.note_id===cur.id),due=cs.filter(isDue).length,cm=cur.module||"";
+    right=`<div class="add" style="margin-bottom:10px"><label class="mut">Module <select data-f="notemod" data-id="${cur.id}"><option value="">No module</option>${modList().map(m=>`<option ${m===cm?"selected":""}>${esc(m)}</option>`).join("")}</select></label><button data-act="notepreview">${UI.preview?"Edit":"Preview"}</button><button class="btn" data-act="mkcards">Make flashcards</button><button data-act="aicards">Make with AI</button><button data-act="gostudy" data-id="${cur.id}" ${cs.length?"":"disabled"}>Study${due?" ("+due+" due)":""}</button><span class="mut">${cs.length} cards</span></div>
+    <input id="nt" data-id="${cur.id}" value="${esc(cur.title)}" placeholder="Title" style="width:100%;font-size:18px;margin-bottom:8px">
+    ${UI.preview?`<div class="md">${mdHtml(cur.body)}</div>`:`<textarea id="nb" data-id="${cur.id}" rows="20" style="width:100%">${esc(cur.body)}</textarea>`}
+    <div style="margin-top:8px"><button data-act="notedel" data-id="${cur.id}">Delete note and its cards</button></div>`;
+  }
+  const list=modGroups(vis).map(g=>`<div class="mut" style="margin:12px 0 4px;font-weight:600">${esc(g.name)} · ${g.notes.length}</div>`+g.notes.map(n=>`<div class="ni ${cur&&n.id===cur.id?"on":""}" data-act="noteopen" data-id="${n.id}">${esc(n.title||"Untitled")} <span style="opacity:.7">· ${S.cards.filter(c=>c.note_id===n.id).length}</span></div>`).join("")).join("");
+  return `<h1>Notes</h1>${UI.imp?impPanel():""}<div class="split"><div class="card"><label class="btn" style="display:block;text-align:center;padding:8px;border-radius:10px;cursor:pointer;margin-bottom:6px">Import .md files<input type="file" accept=".md,.markdown,.txt" multiple data-md hidden></label>
+  <div class="mut" style="font-size:12px;margin-bottom:8px">Import into <select data-f="imod" style="max-width:150px"><option value="auto" ${UI.imod==="auto"?"selected":""}>Detect from file name</option><option value="" ${UI.imod===""?"selected":""}>No module</option>${modList().map(m=>`<option ${m===UI.imod?"selected":""}>${esc(m)}</option>`).join("")}</select></div>
+  <details style="margin-bottom:8px"><summary class="mut">Import from Notion</summary><div class="mut" style="font-size:12px;margin:6px 0">Export from Notion as Markdown &amp; CSV, then choose the .zip or the unzipped folder. You can review modules before anything is imported.</div>
+  <label class="btn" style="display:block;text-align:center;padding:8px;border-radius:10px;cursor:pointer;margin-bottom:6px">Choose .zip<input type="file" accept=".zip" data-zip hidden></label>
+  <label class="btn" style="display:block;text-align:center;padding:8px;border-radius:10px;cursor:pointer">Choose folder<input type="file" webkitdirectory data-dir hidden></label></details>
+  <button data-act="notenew" style="width:100%;margin-bottom:8px">New note</button>
+  <select data-f="nmod" style="width:100%">${modOpts(UI.nmod,"All modules")}</select>${list||'<p class="mut">No notes in this module yet.</p>'}</div>
+  <div class="card">${right}</div></div>`;
+}
+function vCards(){
+  const f=UI.cmod,deck=f?(f==="__none"?"m:":"m:"+f):"all",mm=noteMods(),sc=S.cards.filter(c=>inDeck(c,deck,mm));
+  const q=queue(deck),now=Date.now(),t0=dayStart(now),ids=new Set(sc.map(c=>c.id));
+  const days=new Set(S.reviews.map(r=>r.day));let streak=0;const d=new Date(now-4*36e5);if(!days.has(ymd(d)))d.setDate(d.getDate()-1);while(days.has(ymd(d))){streak++;d.setDate(d.getDate()-1)}
+  const cut=ymd(new Date(now-30*DAY)),rr=S.reviews.filter(r=>ids.has(r.card_id)&&r.prev_state===2&&r.day>=cut),ret=rr.length?Math.round(rr.filter(r=>r.rating>1).length/rr.length*100)+"%":"–";
+  const fc=[],lab=[];
+  for(let i=0;i<7;i++){const a=addDays(t0,i),b=addDays(t0,i+1);lab.push(new Date(a).toLocaleDateString("en-GB",{weekday:"short"}));
+    fc.push(sc.filter(c=>c.state===2&&c.due>=(i?a:0)&&c.due<b).length+(i===0?sc.filter(c=>(c.state===1||c.state===3)&&c.due<b).length:0))}
+  const vis=S.notes.filter(n=>inFilter(n,f));
+  const deckRow=n=>{const k=queue(n.id),tot=S.cards.filter(c=>c.note_id===n.id).length;
+    return `<div class="task" style="justify-content:space-between"><div class="tt"><div class="tn" style="cursor:default">${esc(n.title||"Untitled")}</div><div class="mut">${tot} cards · New ${k.fresh.length} · Learning ${k.learn.length+k.ahead.length} · Due ${k.rev.length}</div></div><button data-act="opennote" data-id="${n.id}">Open note</button><button class="btn" data-act="gostudy" data-id="${n.id}" ${k.fresh.length+k.learn.length+k.rev.length?"":"disabled"}>Study</button></div>`};
+  const decks=modGroups(vis).map(g=>{const k=queue("m:"+g.key),tot=S.cards.filter(c=>inDeck(c,"m:"+g.key,mm)).length;
+    return `<div class="row" style="margin:16px 0 4px"><b style="font:600 16px Georgia,serif">${esc(g.name)}</b><span class="mut">${tot} cards · Due ${k.learn.length+k.rev.length} · New ${k.fresh.length}</span><button class="btn" data-act="gostudy" data-id="m:${esc(g.key)}" ${k.fresh.length+k.learn.length+k.rev.length?"":"disabled"}>Study ${esc(g.name)}</button></div>`+g.notes.map(deckRow).join("")}).join("")||'<p class="mut">No notes here yet. Import .md files on the Notes page and flashcards are made automatically.</p>';
+  const qs=(UI.cq||"").toLowerCase(),nm=id=>{const n=S.notes.find(x=>x.id===id);return n?n.title:"?"};
+  const list=sc.filter(c=>(!UI.cdeck||c.note_id===+UI.cdeck)&&(!qs||(c.front+" "+c.back).toLowerCase().includes(qs))).sort((a,b)=>b.id-a.id);
+  const stl=c=>c.state===0?"New":c.state===2?"Due "+new Date(c.due).toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"Learning";
+  const scope=f?(f==="__none"?"No module":f):"all modules";
+  return `<div class="row"><h1>Flashcards</h1><span><select data-f="cmod" title="Filter by module">${modOpts(UI.cmod,"All modules")}</select> <button class="btn" data-act="gostudy" data-id="${esc(deck)}" ${q.fresh.length+q.learn.length+q.rev.length?"":"disabled"}>Study ${esc(scope)} (${q.learn.length+q.rev.length} due, ${q.fresh.length} new)</button></span></div>
+  <div class="grid7" style="grid-template-columns:repeat(4,1fr)"><div class="card"><h3>Due now</h3><b style="font-size:26px">${q.learn.length+q.rev.length}</b></div><div class="card"><h3>New today</h3><b style="font-size:26px">${q.fresh.length}</b></div><div class="card"><h3>Streak</h3><b style="font-size:26px">${streak} day${streak===1?"":"s"}</b></div><div class="card"><h3>Retention (30 days)</h3><b style="font-size:26px">${ret}</b></div></div>
+  <div class="card"><h3>Decks by module</h3>${decks}</div>
+  <div class="card"><h3>Due in the next 7 days (${esc(scope)})</h3>${bars(fc,lab)}</div>
+  <div class="card"><h3>Add a card</h3>${S.notes.length?`<form class="add" data-form="card"><select name="note">${S.notes.map(n=>`<option value="${n.id}">${esc((n.module?n.module+" · ":"")+(n.title||"Untitled"))}</option>`).join("")}</select><input name="front" placeholder="Front" required style="flex:1;min-width:160px"><input name="back" placeholder="Answer" required style="flex:1;min-width:160px"><button class="btn">Add</button></form>`:'<span class="mut">Create a note first.</span>'}</div>
+  <div class="card"><h3>Browse cards (${list.length})</h3><div class="add" style="margin-bottom:8px"><input data-f="cq" value="${esc(UI.cq||"")}" placeholder="Search cards"><select data-f="cdeck"><option value="">All decks</option>${vis.map(n=>`<option value="${n.id}" ${+UI.cdeck===n.id?"selected":""}>${esc(n.title||"Untitled")}</option>`).join("")}</select></div>
+  ${list.slice(0,60).map(c=>`<div class="task"><div class="tt"><div class="tn" style="cursor:default">${inl(c.front)}</div><div class="mut">${inl(c.answer||c.back)}</div><div class="chips"><span class="chip">${esc(nm(c.note_id))}</span><span class="chip">${stl(c)}</span></div></div><button class="ib" data-act="cedit" data-id="${c.id}" title="Edit">✎</button><button class="ib" data-act="cdel" data-id="${c.id}" title="Delete">✕</button></div>`).join("")||'<p class="mut">No cards.</p>'}${list.length>60?`<p class="mut">Showing the newest 60. Use search to narrow down.</p>`:""}</div>`;
+}
+function vStudy(deck){
+  if(!UI.st||UI.st.deck!==deck)UI.st={deck,phase:"ask",cur:null,typed:"",score:null,done:0};
+  const st=UI.st,q=queue(deck),mode=cfg("study_mode"),now=Date.now();
+  let c=S.cards.find(x=>x.id===st.cur);
+  if(!c){c=q.learn[0]||q.rev[0]||q.fresh[0]||q.ahead[0]||null;st.cur=c?c.id:null;st.phase="ask";st.typed="";st.score=null}
+  const isMod=String(deck).startsWith("m:"),note=deck==="all"||isMod?null:S.notes.find(n=>n.id===+deck);
+  const head=`<div class="row"><h1>${esc(note?note.title:isMod?(String(deck).slice(2)||"No module"):"All flashcards")}</h1><span><button data-act="smode">${mode==="type"?"Typing answers":"Flip and grade"}</button> <button data-act="goto" data-to="cards">Done</button></span></div>
+  <div class="counts"><span>New ${q.fresh.length}</span><span>Learning ${q.learn.length+q.ahead.length}</span><span>Due ${q.rev.length}</span></div>`;
+  if(!c){
+    const mine=S.cards.filter(x=>inDeck(x,deck)),next=mine.filter(x=>x.state>0).sort((a,b)=>a.due-b.due)[0];
+    return head+`<div class="card"><h3>${mine.length?"All done for now":"No flashcards here yet"}</h3><p>${mine.length?`You reviewed ${st.done} card${st.done===1?"":"s"} this session.${next?` Next one is due ${new Date(next.due).toLocaleString("en-GB",{weekday:"short",hour:"2-digit",minute:"2-digit"})}.`:""}`:"Make some from the Notes page."}</p></div>`;
+  }
+  const front=`<div class="fcard">${inl(c.front).replace(/\n/g,"<br>")}</div>`;
+  if(st.phase==="ask")return head+front+(mode==="type"
+    ?`<textarea id="ans" rows="2" placeholder="Type your answer, then press Enter" autocomplete="off" spellcheck="false"></textarea><div class="add" style="margin-top:8px"><button class="btn" data-act="check">Check</button><button data-act="idk">I don’t know</button></div>`
+    :`<button class="btn" data-act="show">Show answer (Space)</button>`);
+  const exp=c.answer||c.back,sc=st.score;
+  const label=sc==null?"":sc>=.85?"Correct":sc>=.55?"Partly right":"Not quite",sug=sc==null?0:sc>=.85?3:sc>=.55?2:1;
+  const cmp=mode==="type"&&sc!=null
+    ?`<div class="fcard sm"><div><b>Your answer</b><div>${st.typed.trim()?esc(st.typed):'<span class="mut">(blank)</span>'}</div><b style="display:block;margin-top:10px">Expected · ${label} (${Math.round(sc*100)}%)</b><div>${diffHtml(st.typed,exp)}</div>${/\$/.test(exp)?`<div class="mut" style="margin-top:8px">${inl(exp)}</div>`:""}${c.kind==="cloze"?`<div class="mut" style="margin-top:8px">${inl(c.back)}</div>`:""}</div></div>`
+    :`<div class="fcard sm"><div>${inl(c.back).replace(/\n/g,"<br>")}</div></div>`;
+  const names=["Again","Hard","Good","Easy"];
+  const btns=[1,2,3,4].map(r=>`<button class="r${r} ${sug===r?"sug":""}" data-act="rate" data-r="${r}">${names[r-1]}<small>${fmtNext(sched(c,r,now),now)}</small></button>`).join("");
+  return head+front+cmp+`<div class="rate">${btns}</div><p class="mut" style="text-align:center">Keys 1–4${sug?" · suggested: "+names[sug-1]:""}</p>`;
+}
+/* ---------- focus timer + kingdom ---------- */
+const fElapsed=()=>UI.f.acc+(UI.f.run?Date.now()-UI.f.startAt:0);
+function fmtTimer(){
+  const f=UI.f,s=f.mode==="down"?Math.max(0,f.mins*60-Math.floor(fElapsed()/1000)):Math.floor(fElapsed()/1000),h=Math.floor(s/3600);
+  return(h?h+":"+pad(Math.floor(s%3600/60)):pad(Math.floor(s/60)))+":"+pad(s%60);
+}
+const earnedGold=()=>S.sessions.reduce((a,s)=>a+(+s.minutes||0),0)+10*new Set(S.sessions.map(s=>s.day)).size;
+const spentGold=()=>S.kingdom.reduce((a,b)=>a+(+b.cost||0),0);
+const spendable=()=>earnedGold()-spentGold();
+const LEVELS=[[0,"Wanderer"],[40,"Settler"],[100,"Villager"],[180,"Artisan"],[300,"Merchant"],[450,"Page"],[650,"Squire"],[900,"Knight"],[1200,"Sheriff"],[1600,"Steward"],[2100,"Baron"],[2700,"Viscount"],[3400,"Count"],[4200,"Marquess"],[5200,"Duke"],[6400,"Archduke"],[7800,"Prince"],[9400,"Regent"],[11200,"King"],[13500,"High King"],[16000,"Emperor"],[19000,"Sovereign"],[22500,"Dynast"],[26500,"Immortal"]];
+function titleOf(g){let i=0;LEVELS.forEach((l,j)=>{if(g>=l[0])i=j});return{n:i+1,name:LEVELS[i][1],from:LEVELS[i][0],next:LEVELS[i+1]||null}}
+const CAT=[
+  {k:"grove",n:"Grove",c:10,lvl:1,d:"A few trees to green the land"},
+  {k:"cottage",n:"Cottage",c:15,lvl:1,d:"Homes for your people"},
+  {k:"well",n:"Well",c:20,lvl:1,d:"Fresh water for the village"},
+  {k:"farm",n:"Farm",c:30,lvl:2,d:"Fields and a barn"},
+  {k:"orchard",n:"Orchard",c:35,lvl:3,d:"Fruit trees in tidy rows"},
+  {k:"windmill",n:"Windmill",c:45,lvl:3,d:"Grinds the harvest"},
+  {k:"market",n:"Market",c:60,lvl:4,d:"Trade brings travellers"},
+  {k:"inn",n:"Inn",c:70,lvl:5,d:"A warm bed for visitors"},
+  {k:"tower",n:"Watchtower",c:90,lvl:5,d:"Keeps watch over the realm"},
+  {k:"library",n:"Library",c:120,lvl:6,max:2,d:"Where scholars gather"},
+  {k:"monument",n:"Monument",c:150,lvl:8,max:1,d:"Remembers your first great deeds"},
+  {k:"cathedral",n:"Cathedral",c:200,lvl:9,max:1,d:"A spire that reaches the sky"},
+  {k:"castle",n:"Castle",c:400,lvl:10,max:1,d:"The seat of your dynasty"},
+  {k:"palace",n:"Palace",c:800,lvl:14,max:1,d:"The crown of an enduring dynasty"}
+];
+const COLS=8,ROWS=6,TS=100,MX=20,MY=20,RIVER=3,BRIDGE=2;
+const rnd=n=>{const s=Math.sin(n*12.9898)*43758.5453;return s-Math.floor(s)};
+const tree=(x,y,r)=>`<ellipse cx="${x+4}" cy="${y+r*.8}" rx="${r*.8}" ry="${r*.3}" fill="#0a171b" opacity=".4"/><path d="M${x} ${y}v${r}" stroke="#9d8057" stroke-width="3"/><path d="M${x-r} ${y+5}l${r} ${-r*2} ${r} ${r*2}z" fill="#305d48"/><path d="M${x-r*.8} ${y-3}l${r*.8} ${-r*1.8} ${r*.8} ${r*1.8}z" fill="#467958"/><path d="M${x-r*.55} ${y-12}l${r*.55} ${-r*1.2} ${r*.55} ${r*1.2}z" fill="#64916a"/>`;
+const ground=()=>'<ellipse cx="53" cy="84" rx="38" ry="10" fill="#091b1a" opacity=".45"/>';
+function house(x=18,y=48,w=48,h=29,roof="#647f8d"){
+  const z=w*.32;
+  return `<polygon points="${x},${y} ${x+w},${y-10} ${x+w},${y+h-10} ${x},${y+h}" fill="#d6c59b"/><polygon points="${x+w},${y-10} ${x+w+z},${y} ${x+w+z},${y+h} ${x+w},${y+h-10}" fill="#948666"/><polygon points="${x-5},${y} ${x+w*.46},${y-26} ${x+w+6},${y-10} ${x+w},${y-10}" fill="${roof}"/><polygon points="${x+w*.46},${y-26} ${x+w+z+5},${y-2} ${x+w+6},${y-10}" fill="#3d5661"/><path d="M${x+7} ${y+4}v${h-4}m${w-17} -${h+2}v${h-4}" stroke="#877254" stroke-width="2"/><path d="M${x+18} ${y+h-4}v-14q5-7 10-2v14" fill="#26382f"/><rect class="hearth" x="${x+5}" y="${y+8}" width="7" height="8" rx="1" fill="#f6d690"/><path d="M${x+5} ${y+12}h7" stroke="#8b744f"/>`;
+}
+const towerArt=(x=38,y=29,w=25,h=54,spire=false)=>`<ellipse cx="${x+w*.6}" cy="${y+h+2}" rx="${w*.7}" ry="6" fill="#0b1917" opacity=".4"/><path d="M${x} ${y}q${w/2} 8 ${w} 0v${h}q-${w/2} 8 -${w} 0z" fill="#b8b99e"/><path d="M${x+w*.65} ${y+4}v${h-2}q8-1 ${w*.35} -4V${y}" fill="#7b9182"/><path d="M${x+3} ${y+17}h${w-6}m-${w-6} 12h${w-6}m-${w-6} 12h${w-6}" stroke="#92a28c"/><path d="M${x+w*.35} ${y+16}v9h6v-9q-3-5-6 0" fill="#f4d18d"/>${spire?`<path d="M${x-4} ${y+2}l${w*.65} -27 ${w*.65} 27q-${w*.65} 6 -${w*1.3} 0" fill="#5b7b8b"/>`:`<path d="M${x-2} ${y+3}v-10h6v6h5v-6h7v6h5v-6h6v10" fill="#c6c9ac"/>`}`;
+const ART={
+ grove:()=>ground()+tree(28,65,14)+tree(65,55,18)+tree(51,79,12),
+ cottage:()=>ground()+house()+`<path d="M59 31v-12h7v16" fill="#9a8971"/><path d="M62 16q-5-7 0-12" stroke="#c3d6c0" opacity=".35" fill="none"/>`,
+ well:()=>ground()+`<ellipse cx="50" cy="72" rx="24" ry="12" fill="#758b7c"/><path d="M26 63v10q24 17 48 0V63" fill="#a4b5a1"/><ellipse cx="50" cy="63" rx="24" ry="11" fill="#d0d3b3"/><ellipse cx="50" cy="63" rx="17" ry="7" fill="#244e5b"/><path d="M29 63V37m42 26V37" stroke="#b69c71" stroke-width="4"/><path d="M23 40l27-20 27 20-27 6z" fill="#678895"/><path d="M50 44v14" stroke="#d9c18b"/><path d="M44 57h12v8H44z" fill="#b39563"/>`,
+ farm:()=>ground()+`<path d="M8 65l44-9 35 19-44 13z" fill="#765d3a"/>`+[0,1,2,3,4].map(i=>`<path d="M${15+i*8} ${65-i*1.5}l30 17" stroke="#c5a964" stroke-width="3"/>`).join('')+house(48,38,27,24,'#af795c'),
+ orchard:()=>ground()+[[24,49],[54,42],[78,61],[41,75]].map(([x,y])=>`<path d="M${x} ${y}v12" stroke="#a48a63" stroke-width="3"/><circle cx="${x}" cy="${y-5}" r="13" fill="#527d52"/><circle cx="${x-4}" cy="${y-9}" r="10" fill="#729259"/><circle cx="${x-4}" cy="${y-9}" r="2.5" fill="#de9a68"/><circle cx="${x+6}" cy="${y-4}" r="2.5" fill="#de9a68"/>`).join(''),
+ windmill:()=>ground()+`<path d="M35 82l7-48h17l9 48q-16 8-33 0" fill="#d2c69f"/><path d="M54 35l5 44 9 3-9-48" fill="#9a9d80"/><path d="M35 37l16-22 16 22z" fill="#6f8a94"/><path d="M47 83V68q5-7 9 0v15" fill="#344237"/><g class="wind-sails" stroke="#bca77c" stroke-width="2" fill="#d7d7b2"><path d="M50 44L23 18l-6 10 33 16 27 26 6-10z"/><path d="M50 44l26-27 10 6-36 21-26 27-10-6z"/></g><circle cx="50" cy="44" r="4" fill="#a68d62"/>`,
+ market:()=>ground()+`<path d="M18 42v37m63-37v37" stroke="#a98e62" stroke-width="4"/><path d="M13 43l14-19h47l14 19z" fill="#d6c18e"/>`+[0,1,2,3,4].map(i=>`<path d="M${14+i*15} 43l${9-i*3} -19h7l${i*3-2} 19z" fill="#6e9275"/>`).join('')+`<path d="M18 64h63v16H18z" fill="#ae8d5a"/><path d="M18 70h63" stroke="#ddbb7b"/><g fill="#dca768"><circle cx="29" cy="61" r="4"/><circle cx="38" cy="60" r="4"/><circle cx="34" cy="55" r="4"/></g><path d="M56 57h17v7H56z" fill="#9bb079"/>`,
+ inn:()=>ground()+house(12,42,56,39,'#987d68')+`<path d="M20 48l48-9m-37 7v35m27-40v32" stroke="#796443" stroke-width="3"/><path d="M74 48h17v8" stroke="#d3bc80" stroke-width="2"/><rect x="81" y="55" width="14" height="13" rx="2" fill="#d4b67b"/><path d="M85 61h6" stroke="#6b7353"/><rect x="41" y="51" width="9" height="9" fill="#f2d497"/>`,
+ tower:()=>ground()+towerArt()+`<path d="M50 22V5" stroke="#cdb98a" stroke-width="2"/><path d="M51 5l20 6-20 5" fill="#a1b879"/>`,
+ library:()=>ground()+house(10,45,60,36,'#54798a')+`<path d="M16 54l53-8M20 54v24m13-27v24m14-27v24m14-26v23" stroke="#e7d9ad" stroke-width="4"/><path d="M11 83l62-12 13 8-62 12z" fill="#aeb59c"/><circle cx="41" cy="32" r="6" fill="#edcc83"/><path d="M38 29l3 3 3-3v7l-3-2-3 2z" fill="#685f43"/>`,
+ monument:()=>ground()+`<path d="M24 78l29-7 27 12-29 7z" fill="#a9b298"/><path d="M35 70l19-5 13 8v9l-18 4-14-7z" fill="#c6c9a6"/><path d="M44 68l3-47 9-2 7 45-10 6z" fill="#d8d4ac"/><path d="M56 19l7 45-10 6V25z" fill="#8f9e88"/><path d="M47 21l5-14 4 12-3 6z" fill="#e7cd8b"/><circle cx="52" cy="39" r="3" fill="#91b5a5"/>`,
+ cathedral:()=>ground()+house(28,46,35,36,'#617b90')+towerArt(10,37,16,47,true)+towerArt(72,34,16,48,true)+`<path d="M40 50l9-39 13 36" fill="#7394a1"/><circle class="hearth" cx="48" cy="52" r="7" fill="#e6ca94"/><path d="M48 45v14m-7-7h14" stroke="#8b8e71"/><path d="M43 82V69q6-10 12 0v10" fill="#2b4944"/>`,
+ castle:()=>ground()+`<path d="M17 55l65-5v31l-65 5z" fill="#a5b59c"/><path d="M25 59l50-4v9l-50 4z" fill="#778e7d"/>`+towerArt(39,27,24,52,true)+towerArt(9,43,20,40)+towerArt(72,39,20,42)+`<path d="M43 84V69q9-12 16 0v14z" fill="#233c36"/><path d="M49 15V1l18 5-18 5" fill="#b5c789"/>`,
+ palace:()=>ground()+house(10,48,64,34,'#728c97')+towerArt(4,42,17,42,true)+towerArt(78,40,17,42,true)+`<path d="M34 48v-9a17 17 0 0 1 34 0v9z" fill="#ccb77b"/><path d="M39 40q12-35 24 0" fill="#e4d4a2"/><path d="M51 24V9" stroke="#e3c98b" stroke-width="2"/><circle cx="51" cy="8" r="3" fill="#e8ce8a"/><path d="M46 82V65q7-9 13 0v15" fill="#30483d"/><path d="M28 59v13m8-14v13m32-16v13" stroke="#f5d99a" stroke-width="5"/>`
+};
+function mapSvg(){
+ const W=2*MX+COLS*TS,H=2*MY+ROWS*TS,rx=MX+RIVER*TS;
+ let s=`<svg class="kmap" viewBox="0 0 ${W} ${H}" role="group" aria-label="Your kingdom. Select a building, then choose an empty plot. Use Tab and Enter to select plots."><defs><linearGradient id="land" x2=".8" y2="1"><stop stop-color="#365742"/><stop offset="1" stop-color="#1d382e"/></linearGradient><linearGradient id="water" x2="1" y2="0"><stop stop-color="#193f4b"/><stop offset=".5" stop-color="#2b6470"/><stop offset="1" stop-color="#183d48"/></linearGradient><radialGradient id="lamplight"><stop stop-color="#eecb84" stop-opacity=".28"/><stop offset="1" stop-color="#eecb84" stop-opacity="0"/></radialGradient></defs><rect width="${W}" height="${H}" rx="16" fill="#14291f"/><rect x="15" y="15" width="${W-30}" height="${H-30}" rx="18" fill="url(#land)"/><path d="M${rx-6} 0h112v${H}H${rx-6}z" fill="#6b8160"/><path d="M${rx} 0h100v${H}H${rx}z" fill="url(#water)"/>`;
+ for(let i=0;i<24;i++){const yy=10+i*28;s+=`<path class="water-ripple" d="M${rx+12+rnd(i)*15} ${yy}q15-4 30 0t32 0" fill="none" stroke="#9ac4b7" stroke-opacity=".24" stroke-width="1.5"/>`}
+ const py=MY+BRIDGE*TS+50;
+ s+=`<path d="M20 ${py}H${W-20}" stroke="#7a8060" stroke-width="16"/><path d="M20 ${py-3}H${W-20}" stroke="#aa9b73" stroke-opacity=".4" stroke-width="3"/><rect x="${rx-9}" y="${py-22}" width="118" height="44" rx="5" fill="#9c8861"/>`;
+ for(let i=0;i<13;i++)s+=`<path d="M${rx-4+i*9} ${py-21}v42" stroke="#5e6249" stroke-width="1.5"/>`;
+ s+=`<path d="M${rx-12} ${py-23}h124m-124 46h124" stroke="#ccba8b" stroke-width="4"/>`;
+ for(let y=0;y<ROWS;y++)for(let x=0;x<COLS;x++){
+  if(x===RIVER)continue;const px=MX+x*TS,yy=MY+y*TS,q=S.kingdom.find(z=>z.x===x&&z.y===y),n=y*COLS+x;
+  s+=`<rect x="${px+4}" y="${yy+4}" width="92" height="92" rx="12" fill="${q?'#7a9169':'#72936c'}" fill-opacity="${q?'.15':'.06'}" stroke="#a8c28c" stroke-opacity="${UI.kb&&!q?'.38':'.12'}" stroke-dasharray="${q?'0':'3 9'}"/>`;
+  if(q)s+=`<g transform="translate(${px} ${yy})" class="${Date.now()-q.built<5000?'newb':''}">${(ART[q.kind]||(()=>''))()}</g>`;
+  else for(let t=0;t<5;t++){const tx=px+13+rnd(n*8+t)*73,ty=yy+20+rnd(n*5+t+3)*65;s+=`<path d="M${tx} ${ty}l-2-4m2 4 3-5" stroke="#87a270" stroke-opacity=".4" stroke-width="1.5"/>`}
+  const label=q?(CAT.find(c=>c.k===q.kind)||{n:q.kind}).n:'Empty plot';
+  s+=`<rect class="plot ${q&&q.id===UI.kp?'selected':''}" role="button" tabindex="0" aria-label="${esc(label)}, row ${y+1}, column ${x+1}" data-act="plot" data-x="${x}" data-y="${y}" x="${px+3}" y="${yy+3}" width="94" height="94" rx="10"><title>${label}</title></rect>`;
+ }
+ for(let i=0;i<18;i++){const x=26+i*46;if(Math.abs(x-(rx+50))>72)s+=tree(x,18,9+rnd(i)*3)+tree(x,H-8,9+rnd(i+30)*3)}
+ for(let i=0;i<5;i++)s+=tree(12,100+i*100,9)+tree(W-10,100+i*100,9);
+ for(const x of [rx-17,rx+117]){s+=`<circle cx="${x}" cy="${py-24}" r="35" fill="url(#lamplight)"/><path d="M${x} ${py-17}v-16" stroke="#c0ac79" stroke-width="2"/><rect class="hearth" x="${x-3}" y="${py-38}" width="6" height="8" rx="2" fill="#f3d38c"/>`}
+ return s+'</svg>';
+}
+function vKingdom(){
+  const earned=earnedGold(),bal=spendable(),t=titleOf(earned),goal=CAT.find(c=>c.k===cfg("kingdom_goal")),sel=S.kingdom.find(q=>q.id===UI.kp);
+  const pct=t.next?Math.round((earned-t.from)/(t.next[0]-t.from)*100):100;
+  const owned=k=>S.kingdom.filter(q=>q.kind===k).length;
+  const cat=CAT.map(c=>{const o=owned(c.k),maxed=c.max&&o>=c.max,locked=c.lvl>t.n,afford=c.c<=bal;
+    return `<button class="kbtn ${UI.kb===c.k?"sel":""}" data-act="kpick" data-k="${c.k}" ${maxed||locked?"disabled":""} title="${esc(c.d)}"><svg class="kthumb" viewBox="0 0 100 100" aria-hidden="true">${ART[c.k]()}</svg><span class="kcopy"><b>${c.n}</b>${o?` <span style="opacity:.7">×${o}</span>`:""}<br><small>${locked?"Unlocks at Level "+c.lvl:maxed?"Built":UI.kb===c.k?"Click an empty plot":afford?"Tap to build":"Tap to save for this"}</small></span><span class="kcost"><b>${c.c}</b><br><small>gold</small></span></button>`}).join("");
+  const goalCard=goal&&goal.c>bal?`<div class="card"><h3>Saving for: ${goal.n}</h3><div class="meter"><i style="width:${Math.min(100,Math.round(Math.max(0,bal)/goal.c*100))}%"></i></div><p class="mut" style="margin:8px 0 0">${goal.c-bal} more gold, about ${goal.c-bal} minutes of focus</p></div>`:"";
+  const info=sel?`<div class="card"><h3>${(CAT.find(c=>c.k===sel.kind)||{n:sel.kind}).n}</h3><p style="margin-top:0">Built for ${sel.cost} gold.</p><button data-act="kdemo">Demolish (full refund)</button></div>`:"";
+  const lvls=LEVELS.map((l,i)=>{const un=CAT.filter(c=>c.lvl===i+1&&i>0).map(c=>c.n);
+    return `<div class="row" style="padding:4px 0;${i+1===t.n?"font-weight:700;":""}${i+1>t.n?"opacity:.6":""}"><span>${i+1<=t.n?"✓":"·"} Level ${i+1} · ${l[1]}${un.length?` <span class="mut">(unlocks ${un.join(", ")})</span>`:""}</span><span class="mut">${l[0]} gold</span></div>`}).join("");
+  return `<div class="row"><h1>Your dynasty</h1><button class="btn" data-act="goto" data-to="focus">Earn gold in Focus Studio</button></div>
+  <p class="kingdom-banner">A quiet realm, built one focused minute at a time.</p><div class="kgrid"><div>${mapSvg()}<p class="mut">${S.kingdom.length} building${S.kingdom.length===1?"":"s"} · click a building in the list, then an empty plot to place it. Click a building to inspect or demolish it.</p></div>
+  <div><div class="card" style="margin-top:0"><div class="row"><span class="mut">Treasury</span><b style="font-size:30px">${bal} gold</b></div><div class="mut">${earned} earned · ${spentGold()} spent</div></div>
+  <div class="card"><h3>Level ${t.n} · ${t.name}</h3><div class="meter"><i style="width:${pct}%"></i></div><p class="mut" style="margin:8px 0 0">${t.next?`${t.next[0]-earned} gold to reach Level ${t.n+1}, ${t.next[1]}`:"You have reached the highest level. Long may you reign."}</p></div>
+  ${goalCard}${info}<div class="card"><h3>Build</h3>${cat}${UI.kb?'<button data-act="kcancel" style="width:100%">Cancel</button>':""}<p class="mut" style="margin-bottom:0;font-size:12px">1 gold per focus minute, plus 10 for your first session each day. Levels come from all the gold you have ever earned, and unlock new buildings. Demolishing refunds the full cost.</p></div>
+  <details class="card"><summary>All ${LEVELS.length} levels</summary><div style="margin-top:8px">${lvls}</div></details></div></div>`;
+}
+function vFocus(){
+  const f=UI.f,el=fElapsed(),started=el>0||f.run,ts=S.sessions.filter(s=>s.day===TODAY()),tm=ts.reduce((a,s)=>a+s.minutes,0),goal=CAT.find(c=>c.k===cfg("kingdom_goal")),bal=spendable(),lv=titleOf(earnedGold());
+  return `<h1>Focus Studio</h1><div class="card"><div class="timer" id="ft">${fmtTimer()}</div>
+  <div class="add" style="justify-content:center"><select data-f="ft"><option value="">No task</option>${S.tasks.filter(t=>!t.done).map(t=>`<option value="${t.id}" ${String(t.id)===String(f.task)?"selected":""}>${esc(t.title)}</option>`).join("")}</select>
+  ${f.mode==="down"?`<input type="number" min="1" max="240" value="${f.mins}" data-f="fm" style="width:80px" ${started?"disabled":""} title="Minutes"> min`:""}
+  <button data-act="fmode" ${started?"disabled":""}>${f.mode==="down"?"Countdown":"Count up"}</button>
+  <button class="btn" data-act="${f.run?"fpause":"fstart"}">${f.run?"Pause":el>0?"Resume":"Start"}</button>
+  <button data-act="ffinish" ${el>=60000?"":"disabled"}>Finish and claim gold</button><button data-act="freset" ${started?"":"disabled"}>Discard</button></div>
+  <p class="mut" style="text-align:center;margin-bottom:0">Every minute you focus earns 1 gold, plus 10 for your first session of the day. Finish early and you keep what you earned.</p></div>
+  <div class="card row"><span>Today: <b>${tm}</b> min in ${ts.length} session${ts.length===1?"":"s"}</span><span>Level <b>${lv.n}</b> ${lv.name} · Treasury: <b>${bal}</b> gold <button data-act="goto" data-to="kingdom">Visit your kingdom</button></span></div>
+  ${goal&&goal.c>bal?`<div class="card"><h3>Saving for: ${goal.n}</h3><div class="meter"><i style="width:${Math.min(100,Math.round(Math.max(0,bal)/goal.c*100))}%"></i></div><p class="mut" style="margin:8px 0 0">${goal.c-bal} more minutes of focus to go</p></div>`:""}`;
+}
+async function finishSession(auto){
+  const f=UI.f,raw=fElapsed(),el=f.mode==="down"?Math.min(raw,f.mins*60000):raw,mins=Math.floor(el/60000);
+  f.run=false;f.acc=0;f.startAt=0;
+  if(mins<1){toast("Sessions under a minute don’t earn gold");return}
+  const before=earnedGold(),lv0=titleOf(before).n,r=await add("sessions",{minutes:mins,day:TODAY(),task_id:f.task||0});
+  if(!r)return toast("Couldn’t save that session. Is the server running?");
+  const after=earnedGold(),gain=after-before,lv=titleOf(after);
+  if(auto)ping("f"+Date.now(),"Focus session done","+"+gain+" gold. Time for a break",true);
+  let msg="+"+gain+" gold for "+mins+" minute"+(mins>1?"s":"");
+  if(lv.n>lv0){const un=CAT.filter(c=>c.lvl>lv0&&c.lvl<=lv.n).map(c=>c.n);msg+=" · Level up! You are now "+lv.name+" (Level "+lv.n+")"+(un.length?". Unlocked: "+un.join(", "):"")}
+  toast(msg,false);
+}
+function last7(){const a=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);a.push(d)}return a}
+function bars(v,l){const m=Math.max(1,...v);return `<div class="bars">${v.map((x,i)=>`<div class="bc"><span>${x}</span><i style="height:${Math.round(x/m*110)}px"></i><em>${l[i]}</em></div>`).join("")}</div>`}
+function streak(h){const set=new Set(S.habit_logs.filter(l=>l.habit_id===h.id).map(l=>l.day));const d=new Date();if(!set.has(ymd(d)))d.setDate(d.getDate()-1);let n=0;while(set.has(ymd(d))){n++;d.setDate(d.getDate()-1)}return n}
+function vAnalytics(){
+  const days=last7(),lab=days.map(d=>d.toLocaleDateString("en-GB",{weekday:"short"}));
+  const done=days.map(d=>S.tasks.filter(t=>t.done&&(t.done_at||"").slice(0,10)===ymd(d)).length);
+  const foc=days.map(d=>S.sessions.filter(s=>s.day===ymd(d)).reduce((a,s)=>a+s.minutes,0));
+  const spaces=SPACES.map(s=>{const a=S.tasks.filter(t=>t.space===s),dn=a.filter(t=>t.done).length;return `<div style="margin:8px 0"><div class="row"><span>${esc(s)}</span><span class="mut">${dn}/${a.length} done</span></div><div class="meter"><i style="width:${a.length?dn/a.length*100:0}%"></i></div></div>`}).join("");
+  return `<h1>Analytics</h1><div class="card"><h3>Tasks completed, last 7 days</h3>${bars(done,lab)}</div><div class="card"><h3>Focus minutes, last 7 days</h3>${bars(foc,lab)}</div>
+  <div class="card"><h3>Flashcard reviews, last 7 days</h3>${bars(days.map(d=>S.reviews.filter(r=>r.day===ymd(d)).length),lab)}</div><div class="card"><h3>By life space</h3>${spaces}</div><div class="card"><h3>Habit streaks</h3>${S.habits.map(h=>`<div class="row"><span>${esc(h.name)}</span><span>${streak(h)} day${streak(h)===1?"":"s"}</span></div>`).join("")||'<span class="mut">No habits yet.</span>'}</div>`;
+}
+function vGoals(){
+  return `<h1>Goals</h1><div class="card"><form class="add" data-form="goal"><input name="title" placeholder="New goal, e.g. Solve 100 LeetCode problems" required style="flex:1"><select name="space">${SPACES.map(s=>`<option>${esc(s)}</option>`).join("")}</select><input name="target" type="number" min="1" value="10" style="width:80px" title="Target"><button class="btn">Add goal</button></form></div>
+  ${S.goals.map(g=>`<div class="card"><div class="row"><b>${esc(g.title)}</b><span class="mut">${esc(g.space)}</span></div><div class="meter" style="margin:10px 0"><i style="width:${Math.min(100,g.progress/g.target*100)}%"></i></div>
+  <div class="row"><span>${g.progress} / ${g.target}</span><span><button data-act="gdown" data-id="${g.id}">−1</button> <button class="btn" data-act="gup" data-id="${g.id}">+1</button> <button data-act="gdel" data-id="${g.id}">Delete</button></span></div></div>`).join("")||'<p class="mut">No goals yet.</p>'}`;
+}
+function vHabits(){
+  const days=last7(),logs=new Set(S.habit_logs.map(l=>l.habit_id+"|"+l.day));
+  return `<h1>Habits</h1><div class="card"><form class="add" data-form="habit"><input name="name" placeholder="New habit, e.g. Gym" required style="flex:1"><button class="btn">Add habit</button></form></div>
+  <div class="card">${S.habits.map(h=>`<div class="row" style="padding:8px 0"><span style="min-width:150px">${esc(h.name)} <span class="mut">(${streak(h)} day streak)</span></span><span>${days.map(d=>{const k=ymd(d);return `<button class="hcell ${logs.has(h.id+"|"+k)?"on":""}" data-act="habit" data-id="${h.id}" data-day="${k}" title="${k}">${d.getDate()}</button>`}).join(" ")}</span><button class="ib" data-act="habitdel" data-id="${h.id}">✕</button></div>`).join("")||'<p class="mut">No habits yet.</p>'}</div>`;
+}
+function timetableCard(){
+  return `<div class="card"><h3>Timetable</h3>
+  <form class="add" data-form="feed"><input name="url" value="${esc(cfg("feed_url")||"")}" placeholder="MyTimetable feed link" style="flex:1;min-width:240px"><button class="btn">Save and sync</button><button type="button" data-act="feedsync">Sync now</button></form>
+  <p class="mut" style="margin-bottom:0">${cfg("feed_synced")&&cfg("feed_synced")!=="0"?"Last synced "+new Date(+cfg("feed_synced")).toLocaleString("en-GB"):"Not synced yet"}. It re-syncs hourly while Dynasty is open. Every upcoming lecture gets a review task (time and day are set in Settings).</p></div>`;
+}
+function weekRange(off){const m=new Date();m.setHours(0,0,0,0);m.setDate(m.getDate()-((m.getDay()+6)%7)+off*7);const e=new Date(m);e.setDate(m.getDate()+6);return[ymd(m),ymd(e)]}
+const closedMods=new Set(JSON.parse(localStorage.getItem("closedMods")||"[]"));
+function vSpace(sp){
+  if(sp!=="University")return `<h1>${esc(sp)}</h1><div class="card">${addForm({space:sp})}</div>${taskList(S.tasks.filter(t=>t.space===sp))}`;
+  const wr=weekRange(UI.uw),a=wr[0],z=wr[1],cur=UI.uw===0;
+  const fm=d=>new Date(d+"T00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+  const inWeek=t=>{const d=dueDay(t);if(d)return(d>=a&&d<=z)||(cur&&d<a&&!t.done);return cur&&!t.done};
+  const mods=[...S.modules].sort((x,y)=>x.code.localeCompare(y.code));
+  const group=(code,id)=>{
+    const ts=S.tasks.filter(t=>t.space==="University"&&(t.module||"")===code&&inWeek(t));
+    if(!code&&!ts.length)return "";
+    const next=S.events.filter(e=>e.module===code&&e.starts>=stamp()).sort((x,y)=>x.starts.localeCompare(y.starts))[0],key=code||"__none";
+    return `<details class="card mod" data-mod="${esc(key)}" ${closedMods.has(key)?"":"open"}><summary><b>${esc(code||"No module")}</b><span class="mut">${ts.filter(t=>!t.done).length} to do${next?" · next class "+esc(fmtDue(next.starts)):""}${id?` <button class="ib" data-act="moddel" data-id="${id}" title="Remove module">✕</button>`:""}</span></summary>
+    <div style="margin:10px 0">${addForm({space:"University",module:code})}</div>${taskList(ts,"Nothing due this week.")}</details>`};
+  return `<h1>University</h1>${timetableCard()}<div class="card"><form class="add" data-form="module"><input name="code" placeholder="Module name, e.g. Programming III" required><button class="btn">Add module</button></form></div>
+  <div class="row"><b>${cur?"This week":"Week"}: ${fm(a)} – ${fm(z)}</b><span><button data-act="uw" data-id="-1">‹</button> <button data-act="uw" data-id="0">This week</button> <button data-act="uw" data-id="1">›</button></span></div>
+  ${mods.map(m=>group(m.code,m.id)).join("")}${group("",0)}`;
+}
+function vSettings(){
+  const o=(k,v,l)=>`<option value="${v}" ${cfg(k)===v?"selected":""}>${l}</option>`;
+  const perm="Notification" in window?Notification.permission:"unsupported";
+  return `<h1>Settings</h1><div class="card"><h3>Reminders</h3><p>Notifications: <b>${NATIVE?"sent by the background server":perm}</b> ${NATIVE?`<button data-act="ntest">Send a test</button>`:""}${!NATIVE&&perm==="default"?`<button class="btn" data-act="notif">Enable</button>`:""}${!NATIVE&&perm==="granted"?`<button data-act="ntest">Send a test</button>`:""}${!NATIVE&&perm==="denied"?'<span class="mut"> Allow notifications for this site in your browser settings.</span>':""}</p>
+  <p>Remind me <select data-cfg="lead">${o("lead","0","at the time")}${o("lead","5","5 minutes before")}${o("lead","10","10 minutes before")}${o("lead","30","30 minutes before")}${o("lead","60","1 hour before")}</select></p>
+  <p class="mut">${NATIVE?"Reminders come from the background server, so they arrive even when this page is closed.":"Reminders fire while Dynasty is open in a browser tab, so keep it pinned."}</p></div>
+  <div class="card"><h3>Lecture reviews</h3><p>Review time <input type="time" data-cfg="review_time" value="${esc(cfg("review_time"))}"></p>
+  <p>Review on <select data-cfg="review_offset">${o("review_offset","0","the same day")}${o("review_offset","1","the next day")}${o("review_offset","2","two days later")}</select></p>
+  <p>Create reviews for <select data-cfg="review_scope">${o("review_scope","lecture","lectures only")}${o("review_scope","all","every class")}</select></p><p class="mut">Applies to the next timetable you import.</p></div>
+  <div class="card"><h3>Flashcards</h3>
+  <p>New cards per day <input type="number" min="0" max="500" data-cfg="new_per_day" value="${esc(cfg("new_per_day"))}" style="width:80px"> Max reviews per day <input type="number" min="0" max="2000" data-cfg="rev_per_day" value="${esc(cfg("rev_per_day"))}" style="width:80px"></p>
+  <p>Answer style <select data-cfg="study_mode">${o("study_mode","type","Type the answer")}${o("study_mode","flip","Flip and self-grade")}</select></p>
+  <p>Make cards from headings <select data-cfg="heading_cards">${o("heading_cards","1","Yes")}${o("heading_cards","0","No")}</select></p>
+  <h3 style="margin:14px 0 6px">Local AI (free)</h3>
+  ${UI.ai===undefined?'<p class="mut">Checking…</p>':UI.ai&&UI.ai.ok?`<p>Ollama is running. Model <select data-cfg="ai_model">${(UI.ai.models||[]).map(m=>`<option ${m===UI.ai.model?"selected":""}>${esc(m)}</option>`).join("")}</select></p>`:`<p><b>Not available:</b> ${esc(UI.ai?UI.ai.error:"can’t reach the server")}</p>`}
+  <p class="mut" style="margin-bottom:0">“Make with AI” runs on your own computer through Ollama, so it costs nothing and your notes never leave your machine. Install it from ollama.com, then run <code>ollama pull qwen2.5:3b</code> in a terminal (or <code>qwen2.5:7b</code> if you have 16 GB of RAM). Without it, flashcards are still made from your notes’ structure.</p></div>
+  <div class="card"><h3>Backup</h3><a href="/api/all" download="dynasty-backup.json" style="color:var(--ink);text-decoration:underline">Download all data (JSON)</a></div>`;
+}
+
+/* ---------- timetable import ---------- */
+function icsDate(v){const m=v.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?/);if(!m)return null;const n=m.slice(1,7).map(x=>+x||0);return m[7]?new Date(Date.UTC(n[0],n[1]-1,n[2],n[3],n[4],n[5])):new Date(n[0],n[1]-1,n[2],n[3],n[4],n[5])}
+const local=d=>ymd(d)+"T"+hm(d);
+const unesc=s=>(s||"").replace(/\\n/gi," ").replace(/\\,/g,",").replace(/\\;/g,";").trim();
+function parseICS(txt){
+  txt=txt.replace(/\r?\n[ \t]/g,"");const out=[];
+  txt.split("BEGIN:VEVENT").slice(1).forEach(b=>{
+    b=b.split("END:VEVENT")[0];const p={},ex=[];
+    b.split(/\r?\n/).forEach(l=>{const i=l.indexOf(":");if(i<0)return;const name=l.slice(0,i).split(";")[0].toUpperCase(),val=l.slice(i+1);
+      if(name==="EXDATE")val.split(",").forEach(x=>{const d=icsDate(x);if(d)ex.push(local(d))});else p[name]=val});
+    const s=p.DTSTART&&icsDate(p.DTSTART);if(!s)return;
+    const e=p.DTEND?icsDate(p.DTEND):new Date(s.getTime()+3600000),dur=e-s;
+    const rr={};(p.RRULE||"").split(";").forEach(x=>{const kv=x.split("=");rr[kv[0]]=kv[1]});
+    const until=rr.UNTIL?icsDate(rr.UNTIL):null,step=rr.FREQ==="DAILY"?1:rr.FREQ==="WEEKLY"?7:0,cnt=step?Math.min(+rr.COUNT||200,200):1;
+    for(let i=0;i<cnt;i++){const d=new Date(s);d.setDate(s.getDate()+i*step*(+rr.INTERVAL||1));if(until&&d>until)break;
+      const st=local(d);if(ex.includes(st))continue;
+      out.push({uid:p.UID||p.SUMMARY,title:unesc(p.SUMMARY)||"Class",location:unesc(p.LOCATION),starts:st,ends:local(new Date(d.getTime()+dur))})}
+  });
+  return out;
+}
+const moduleOf=t=>(t.match(/[A-Z]{3,4}\d{4}/)||[])[0]||t.split(/[-–:|]/)[0].trim();
+const kindOf=t=>{
+  if(/lecture/i.test(t))return"lecture";if(/drop.?in/i.test(t))return"drop-in";if(/tutorial|seminar/i.test(t))return"tutorial";if(/lab|practical/i.test(t))return"lab";
+  const m=t.match(/(?:^|\s)(L|C|T|W)(?:\d+|\/\d+)?(?:-|\s|$)/);return m?{L:"lecture",C:"lab",T:"tutorial",W:"workshop"}[m[1]]:"other"};
+const nameOf=t=>{const m=t.match(/(?: - |T- )(.+)$/);return m?m[1].trim():""};
+const OVERRIDE={COMP2300:"SDDP"};
+const KL={lecture:"Lecture",lab:"Lab",tutorial:"Tutorial",workshop:"Workshop","drop-in":"Drop-in",other:""};
+const classTitle=(label,t,kind)=>{const n=kind==="lecture"?(t.match(/(?:^|\s)L(\d+)(?:\s|$)/)||[])[1]:"";return(label+" "+(KL[kind]||"")+(n?" "+n:"")).trim()};
+async function createClasses(list){
+  list=list.filter(c=>!/^break hold/i.test(c.title));
+  const names={};
+  list.forEach(c=>{const code=moduleOf(c.title),n=nameOf(c.title);if(n&&!names[code])names[code]=n});
+  const labelOf=c=>c.module||OVERRIDE[moduleOf(c.title)]||names[moduleOf(c.title)]||moduleOf(c.title);
+  const have=new Set(S.events.map(e=>e.source_key)),haveT=new Set(S.tasks.map(t=>t.source_key)),mods=new Set(S.modules.map(m=>m.code));
+  const ne=[],nt=[],nm=[],offset=+cfg("review_offset"),time=cfg("review_time"),all=cfg("review_scope")==="all";
+  list.forEach(c=>{
+    const key=c.uid+"|"+c.starts;if(have.has(key))return;have.add(key);
+    const mod=labelOf(c),kind=c.kind||kindOf(c.title),title=c.module?c.title:classTitle(mod,c.title,kind);
+    if(mod&&!mods.has(mod)){mods.add(mod);nm.push({code:mod,name:""})}
+    ne.push({title,module:mod,kind,starts:c.starts,ends:c.ends,location:c.location||"",source_key:key});
+    if(c.starts.slice(0,10)>=TODAY()&&(all||kind==="lecture")&&!haveT.has("rev:"+key)){
+      const d=new Date(c.starts);d.setDate(d.getDate()+offset);let due=ymd(d)+"T"+time;if(due<c.ends)due=c.ends;
+      nt.push({title:"Review "+title+" ("+d.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+")",space:"University",module:mod,priority:"",due,done:0,done_at:"",star:0,today:0,notes:"",source_key:"rev:"+key})}
+  });
+  if(nm.length)await add("modules",nm);if(ne.length)await add("events",ne);if(nt.length)await add("tasks",nt);
+  toast(ne.length?`Added ${ne.length} classes and ${nt.length} review tasks`:"Timetable is up to date");
+}
+async function syncFeed(){
+  const url=cfg("feed_url");if(!url)return toast("Add your timetable link first");
+  const r=await api("POST","fetch-feed",{url});
+  if(!r)return toast("Can’t reach the Dynasty server");
+  if(r.error)return toast(r.error);
+  const list=parseICS(r.text);if(!list.length)return toast("No classes found in that feed");
+  list.forEach(c=>{c.uid="feed:"+c.uid});
+  const keys=new Set(list.map(c=>c.uid+"|"+c.starts));
+  const stale=S.events.filter(e=>(e.source_key||"").startsWith("feed:")&&e.starts>=stamp()&&!keys.has(e.source_key));
+  for(const e of stale){await del("events",e.id);const rt=S.tasks.find(t=>t.source_key==="rev:"+e.source_key&&!t.done);if(rt)await del("tasks",rt.id)}
+  await createClasses(list);
+  await setCfg("feed_synced",String(Date.now()));
+}
+const maybeSync=async()=>{if(!cfg("feed_url")||Date.now()-(+cfg("feed_synced")||0)<3600000)return;await syncFeed();const a=document.activeElement;if(!a||!/INPUT|TEXTAREA|SELECT/.test(a.tagName))render()};
+
+/* ---------- reminders ---------- */
+const fired=new Set(JSON.parse(localStorage.getItem("fired")||"[]"));
+function ping(key,title,body,force){if(NATIVE&&!force)return;if(fired.has(key))return;fired.add(key);localStorage.setItem("fired",JSON.stringify([...fired].slice(-500)));
+  if("Notification" in window&&Notification.permission==="granted")new Notification(title,{body});else toast(title+": "+body)}
+function check(){
+  const now=Date.now(),lead=+cfg("lead")*60000,win=6*3600000;
+  S.tasks.forEach(t=>{if(t.done||!t.due||t.due.length<16)return;const at=new Date(t.due).getTime();if(now>=at-lead&&now<at+win)ping("t"+t.id+t.due,"Task due",t.title)});
+  S.events.forEach(e=>{const at=new Date(e.starts).getTime();if(now>=at-lead&&now<at)ping("e"+e.id,"Class starting",e.title+(e.location?" @ "+e.location:""))});
+  if(new Date().getHours()>=9)specials(TODAY()).forEach(o=>ping("o"+o.id+TODAY(),o.kind==="birthday"?"Birthday today":"Anniversary today",occName(o,TODAY())));
+  const tm=new Date();tm.setDate(tm.getDate()+1);const tk=ymd(tm);
+  if(new Date().getHours()>=18)specials(tk).forEach(o=>ping("ob"+o.id+tk,"Tomorrow",(o.kind==="birthday"?"Birthday: ":"Anniversary: ")+occName(o,tk)));
+}
+function tick(){
+  const f=UI.f;if(!f.run)return;const el=fElapsed();
+  if(f.mode==="down"&&el>=f.mins*60000){finishSession(true).then(()=>{if(location.hash==="#focus")render()});return}
+  const e=$("#ft");if(e)e.textContent=fmtTimer();
+  const b=$('[data-act="ffinish"]');if(b)b.disabled=el<60000;
+}
+
+/* ---------- birthdays, anniversaries, greeting ---------- */
+const greet=()=>{const h=new Date().getHours();return h>=5&&h<12?"Good morning":h>=12&&h<17?"Good afternoon":h>=17&&h<21?"Good evening":"Good night"};
+const leap=y=>y%4===0&&(y%100!==0||y%400===0);
+const occOn=(o,y)=>{const p=o.date.split("-");let d=+p[2];if(+p[1]===2&&d===29&&!leap(y))d=28;return y+"-"+p[1]+"-"+pad(d)};
+const specials=day=>S.occasions.filter(o=>occOn(o,+day.slice(0,4))===day);
+const nextOcc=o=>{const t=TODAY(),y=+t.slice(0,4),k=occOn(o,y);return k<t?occOn(o,y+1):k};
+const daysTo=k=>Math.round((new Date(k+"T00:00")-new Date(TODAY()+"T00:00"))/864e5);
+const occName=(o,day)=>{const y=+o.date.slice(0,4),n=+day.slice(0,4)-y;return o.name+(y>=1900&&n>0?(o.kind==="birthday"?" turns "+n:" · "+n+(n===1?" year":" years")):"")};
+const occText=(o,day)=>(o.kind==="birthday"?"🎂 ":"💍 ")+occName(o,day);
+// Year 0000 means unknown; existing reminder code already suppresses ages before 1900.
+function occasionDate(v){
+  const d=Number(v.day),m=Number(v.month),known=String(v.year||"").trim(),y=known?Number(known):2000;
+  if(!Number.isInteger(d)||!Number.isInteger(m)||!Number.isInteger(y)||m<1||m>12||d<1||d>31||(known&&(y<1900||y>new Date().getFullYear())))return null;
+  const check=new Date(y,m-1,d);if(check.getMonth()!==m-1||check.getDate()!==d)return null;
+  return (known?String(y):"0000")+"-"+pad(m)+"-"+pad(d);
+}
+function vOcc(kind){
+  const b=kind==="birthday",list=S.occasions.filter(o=>o.kind===kind),now=new Date();
+  const up=list.map(o=>({o,k:nextOcc(o)})).sort((x,y)=>x.k.localeCompare(y.k));
+  const when=n=>n===0?"Today":n===1?"Tomorrow":"In "+n+" days";
+  let months="";
+  for(let i=0;i<12;i++){
+    const items=list.filter(o=>+o.date.slice(5,7)===i+1).sort((x,y)=>x.date.slice(8).localeCompare(y.date.slice(8)));
+    months+=`<div class="mo ${i===now.getMonth()?"now":""}"><h4>${new Date(now.getFullYear(),i,1).toLocaleDateString("en-GB",{month:"long"})}</h4>${items.map(o=>`<div>${+o.date.slice(8)} · ${esc(o.name)}</div>`).join("")||'<div class="mut">None</div>'}</div>`;
+  }
+  return `<h1>${b?"Birthdays":"Anniversaries"}</h1>
+  <div class="card"><form class="add occ-form" data-form="occ" data-kind="${kind}"><input name="name" placeholder="${b?"Whose birthday?":"Which anniversary?"}" aria-label="${b?"Birthday name":"Anniversary name"}" required style="flex:1;min-width:180px"><label class="occ-field">Day<input type="number" name="day" min="1" max="31" required placeholder="DD" style="width:76px"></label><label class="occ-field">Month<select name="month" required><option value="">Month</option>${Array.from({length:12},(_,i)=>`<option value="${i+1}">${new Date(2000,i,1).toLocaleDateString("en-GB",{month:"long"})}</option>`).join("")}</select></label><label class="occ-field year">Year · optional<input type="number" name="year" min="1900" max="${now.getFullYear()}" placeholder="Leave blank if unknown"></label><button class="btn">${b?"Add birthday":"Add anniversary"}</button></form><p class="occ-help">Just the day and month is enough. Add the original year if you’d like to see ${b?"ages":"years together"}. February 29 is celebrated on February 28 in other years.</p></div>
+  <div class="card"><h3>Coming up</h3>${up.map(x=>`<div class="task" style="justify-content:space-between"><span>${esc(occText(x.o,x.k))}</span><span>${when(daysTo(x.k))} · ${esc(fmtDue(x.k))} <button class="ib" data-act="occdel" data-id="${x.o.id}" title="Delete">✕</button></span></div>`).join("")||`<p class="mut">Nothing here yet. Add one above.</p>`}</div>
+  <div class="card"><h3>${now.getFullYear()} calendar</h3><div class="months">${months}</div></div>`;
+}
+const fixSpaces=()=>{["tasks","goals"].forEach(k=>S[k].filter(x=>!SPACES.includes(x.space)).forEach(x=>upd(k,x.id,{space:"Personal"})))};
+async function migrate(){
+  if(cfg("migrated_v2"))return;
+  const ren={},ps=[];
+  S.modules.forEach(m=>{if(/^[A-Z]{3,4}\d{4}$/.test(m.code))ren[m.code]=OVERRIDE[m.code]||m.name||m.code});
+  S.modules.forEach(m=>{if(ren[m.code])ps.push(upd("modules",m.id,{code:ren[m.code],name:""}));else if(m.name)ps.push(upd("modules",m.id,{name:""}))});
+  S.tasks.forEach(t=>{let ti=t.title.split("COMP2300/BIOM2019 (S1)").join("SDDP");Object.keys(ren).forEach(c=>{ti=ti.split(c).join(ren[c])});const mo=ren[t.module]||t.module;if(ti!==t.title||mo!==t.module)ps.push(upd("tasks",t.id,{title:ti,module:mo}))});
+  await Promise.all(ps);
+  await api("POST","purge-timetable",{});
+  Object.assign(S,await (await fetch("/api/all")).json());
+  await setCfg("feed_synced","0");await setCfg("migrated_v2","1");
+}
+
+/* ---------- undo for deleted tasks ---------- */
+const trashTask=r=>{try{return JSON.parse(r.data)}catch(e){return null}};
+function toastUndo(msg,trashId){
+  const t=$("#toast");t.innerHTML=esc(msg)+' <button data-act="undo" data-id="'+trashId+'" style="margin-left:10px">Undo</button>';
+  t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display="none",10000);
+}
+async function removeTask(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  const r=await add("trash",{kind:"task",data:JSON.stringify(t),deleted_at:Date.now()});
+  if(!r)return toast("Couldn’t delete that. Is the server running?");
+  await del("tasks",id);
+  toastUndo("Task deleted",r.id);
+}
+async function restoreTask(trashId){
+  const row=S.trash.find(x=>x.id===trashId),t=row&&trashTask(row);
+  if(!t)return toast("Nothing to restore");
+  delete t.id;
+  const r=await add("tasks",t);if(!r)return toast("Couldn’t restore that. Is the server running?");
+  await del("trash",trashId);
+  const e=$("#toast");if(e)e.style.display="none";
+  toast("Restored: "+t.title);
+}
+const purgeTrash=()=>S.trash.filter(x=>Date.now()-(+x.deleted_at||0)>30*864e5).forEach(x=>del("trash",x.id));
+function trashCard(){
+  const tr=S.trash.filter(x=>x.kind==="task").sort((a,b)=>b.deleted_at-a.deleted_at);
+  if(!tr.length)return"";
+  const ago=ms=>{const m=Math.round((Date.now()-ms)/6e4);return m<1?"just now":m<60?m+" min ago":m<1440?Math.round(m/60)+" h ago":Math.round(m/1440)+" d ago"};
+  return `<div class="card"><h3>Recently deleted (${tr.length})</h3>${tr.map(r=>{const t=trashTask(r);if(!t)return"";
+    return `<div class="task" style="justify-content:space-between"><div class="tt"><div class="tn" style="cursor:default">${esc(t.title)}</div><div class="mut">${esc(t.space||"")}${t.module?" · "+esc(t.module):""} · deleted ${ago(+r.deleted_at)}</div></div><button data-act="restore" data-id="${r.id}">Restore</button><button class="ib" data-act="purge1" data-id="${r.id}" title="Delete forever">✕</button></div>`}).join("")}
+  <div style="margin-top:8px"><button data-act="emptytrash">Empty recently deleted</button> <span class="mut">Items are removed automatically after 30 days. Ctrl/Cmd+Z restores the latest.</span></div></div>`;
+}
+
+/* ---------- wiring ---------- */
+function buildNav(){
+  const L=[["today","☾ Today"],["week","▦ This Week"],["calendar","▣ Calendar"],["tasks","☰ All Tasks"],["notes","✎ Notes"],["cards","▥ Flashcards"],["focus","◔ Focus Studio"],["kingdom","♜ Kingdom"],["analytics","▤ Analytics"],["goals","⚑ Goals"],["habits","↻ Habits"],["birthdays","✿ Birthdays"],["anniversaries","❤ Anniversaries"]];
+  $("#nav").innerHTML=L.map(x=>`<a href="#${x[0]}"><span class="nav-icon" aria-hidden="true">${x[1].split(" ")[0]}</span><span>${x[1].split(" ").slice(1).join(" ")}</span></a>`).join("")+"<h6>Life spaces</h6>"+SPACES.map(s=>`<a href="#space/${encodeURIComponent(s)}"><span class="nav-icon" aria-hidden="true">◦</span><span>${esc(s)}</span></a>`).join("")+`<h6></h6><a href="#settings"><span class="nav-icon" aria-hidden="true">⚙</span><span>Settings</span></a>`;
+}
+function render(){
+  const r=location.hash.slice(1)||"today",pg=r.split("/")[0],arg=decodeURIComponent(r.split("/")[1]||"");
+  document.querySelectorAll("nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+r||(pg==="study"&&a.getAttribute("href")==="#cards")));
+  const V={today:vToday,week:vWeek,calendar:vCal,tasks:vTasks,notes:vNotes,focus:vFocus,analytics:vAnalytics,goals:vGoals,habits:vHabits,cards:vCards,kingdom:vKingdom,study:()=>vStudy(arg),birthdays:()=>vOcc("birthday"),anniversaries:()=>vOcc("anniversary"),settings:vSettings,space:()=>vSpace(arg)};
+  $("#main").innerHTML=(V[pg]||vToday)();
+  document.querySelectorAll("nav a").forEach(a=>{if(a.classList.contains("on"))a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  const af=$("#ans");if(af&&UI.st&&UI.st.phase==="ask")af.focus();
+  if(pg==="settings")refreshAI();
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const a=b.dataset.act,id=+b.dataset.id,t=S.tasks.find(x=>x.id===id);
+  if(a==="done")await upd("tasks",id,t.done?{done:0,done_at:""}:{done:1,done_at:stamp()});
+  else if(a==="star"){if(!t.star&&S.tasks.filter(isDailyQuest).length>=3)return toast("Your three daily quests are full. Remove a star to make room.");await upd("tasks",id,{star:t.star?0:1})}
+  else if(a==="today")await upd("tasks",id,{today:t.today?0:1});
+  else if(a==="del")await removeTask(id);
+  else if(a==="rename"){const n=prompt("Rename task",t.title);if(n&&n.trim())await upd("tasks",id,{title:n.trim()})}
+  else if(a==="undo"||a==="restore")await restoreTask(id);
+  else if(a==="purge1")await del("trash",id);
+  else if(a==="emptytrash"){if(confirm("Permanently delete everything in Recently deleted?"))for(const r of S.trash.filter(x=>x.kind==="task"))await del("trash",r.id)}
+  else if(a==="impgo")await runImport();
+  else if(a==="impcancel")UI.imp=null;
+  else if(a==="notepreview")UI.preview=!UI.preview;
+  else if(a==="mkcards"){const n=S.notes.find(x=>x.id===UI.note)||S.notes[0];if(n){const r=await mergeCards(n.id,mdCards(n));toast(r.added||r.updated?`${r.added} new flashcards, ${r.updated} updated`:"No flashcards found. Use Q:/A: lines, **Term**: definition, Front :: Back or {{c1::cloze}}")}}
+  else if(a==="aicards"){const n=S.notes.find(x=>x.id===UI.note)||S.notes[0];if(!n)return;if(UI.busy)return toast("The AI is still working on the last request");const total=+prompt("About how many flashcards?","20");if(!total)return;
+    UI.busy=true;try{const parts=chunkNote(n.body),per=Math.max(3,Math.round(total/parts.length));let added=0;
+      for(let i=0;i<parts.length;i++){toast("Local AI is working… part "+(i+1)+" of "+parts.length+". Keep this tab open.",true);const r=await api("POST","ai-cards",{text:parts[i],count:per});if(!r)return;if(r.error)return toast(r.error);added+=(await mergeCards(n.id,r.cards.map(x=>({kind:"qa",front:x.front,back:x.back,answer:x.back,ckey:"qa:"+nz(x.front)})))).added}
+      toast("Added "+added+" flashcards from the local AI")}finally{UI.busy=false}}
+  else if(a==="questfocus"){
+    if(!t||t.done)return;
+    if(UI.f.run||UI.f.acc>0){toast("Finish or discard your current focus session before switching tasks.");location.hash="#focus";return}
+    UI.f.task=String(id);location.hash="#focus";return;
+  }
+  else if(a==="goto"){location.hash="#"+b.dataset.to;return}
+  else if(a==="gostudy"){UI.st=null;location.hash="#study/"+encodeURIComponent(b.dataset.id);return}
+  else if(a==="opennote"){UI.note=id;location.hash="#notes";return}
+  else if(a==="check")checkAnswer();
+  else if(a==="idk"){UI.st.typed="";UI.st.score=0;UI.st.phase="graded"}
+  else if(a==="show"){UI.st.score=null;UI.st.phase="graded"}
+  else if(a==="rate")await rate(+b.dataset.r);
+  else if(a==="smode")await setCfg("study_mode",cfg("study_mode")==="type"?"flip":"type");
+  else if(a==="cedit"){const c=S.cards.find(x=>x.id===id),f=prompt("Front",c.front);if(f===null)return;const bk=prompt("Answer",c.answer||c.back);if(bk===null)return;await upd("cards",id,{front:f.trim()||c.front,back:bk.trim()||c.back,answer:bk.trim()||c.answer})}
+  else if(a==="cdel"){if(confirm("Delete this card?"))await del("cards",id)}
+  else if(a==="uw")UI.uw=id===0?0:UI.uw+id;
+  else if(a==="wk")UI.wk=id===0?0:UI.wk+id;
+  else if(a==="cal"){UI.cal=id===0?new Date():new Date(UI.cal.getFullYear(),UI.cal.getMonth()+id,1)}
+  else if(a==="day")UI.sel=b.dataset.day;
+  else if(a==="notenew"){const n=await add("notes",{title:"Untitled",body:"",module:newNoteModule(),updated:new Date().toISOString()});if(n)UI.note=n.id}
+  else if(a==="noteopen")UI.note=id;
+  else if(a==="notedel"){const nc=S.cards.filter(c=>c.note_id===id).length;if(confirm("Delete this note"+(nc?" and its "+nc+" flashcards":"")+"?")){await del("notes",id);S.cards=S.cards.filter(c=>c.note_id!==id);UI.note=null}}
+  else if(a==="fstart"){UI.f.run=true;UI.f.startAt=Date.now()}
+  else if(a==="fpause"){UI.f.acc+=Date.now()-UI.f.startAt;UI.f.run=false}
+  else if(a==="ffinish")await finishSession(false);
+  else if(a==="fmode")UI.f.mode=UI.f.mode==="down"?"up":"down";
+  else if(a==="kcancel")UI.kb=null;
+  else if(a==="kdemo"){const q=S.kingdom.find(z=>z.id===UI.kp);if(q){await del("kingdom",q.id);UI.kp=null;toast("Demolished. "+q.cost+" gold refunded")}}
+  else if(a==="kpick"){const c=CAT.find(z=>z.k===b.dataset.k);if(!c)return;const own=S.kingdom.filter(q=>q.kind===c.k).length;
+    if(c.lvl>titleOf(earnedGold()).n)return toast("Unlocks at Level "+c.lvl);
+    if(c.max&&own>=c.max)return toast("You already have the most of those you can build");
+    if(c.c>spendable()){await setCfg("kingdom_goal",c.k);UI.kb=null;toast("Saving for the "+c.n+": "+(c.c-spendable())+" more gold")}
+    else{UI.kb=UI.kb===c.k?null:c.k;UI.kp=null}}
+  else if(a==="plot"){const x=+b.dataset.x,y=+b.dataset.y,here=S.kingdom.find(q=>q.x===x&&q.y===y);
+    if(UI.kb&&!here){const c=CAT.find(z=>z.k===UI.kb);
+      if(!c||c.c>spendable()||c.lvl>titleOf(earnedGold()).n){UI.kb=null;toast("Not enough gold yet")}
+      else{const r=await add("kingdom",{kind:c.k,x,y,cost:c.c,built:Date.now()});if(!r)return toast("Couldn’t save that. Is the server running?");
+        UI.kp=null;if(cfg("kingdom_goal")===c.k)await setCfg("kingdom_goal","");
+        const own=S.kingdom.filter(q=>q.kind===c.k).length;if((c.max&&own>=c.max)||c.c>spendable())UI.kb=null;toast("Built: "+c.n)}}
+    else if(here){UI.kb=null;UI.kp=here.id}else UI.kp=null}
+  else if(a==="freset"){UI.f.run=false;UI.f.acc=0;UI.f.startAt=0}
+  else if(a==="gup"||a==="gdown"){const g=S.goals.find(x=>x.id===id);await upd("goals",id,{progress:Math.max(0,g.progress+(a==="gup"?1:-1))})}
+  else if(a==="gdel")await del("goals",id);
+  else if(a==="habit"){const l=S.habit_logs.find(x=>x.habit_id===id&&x.day===b.dataset.day);if(l)await del("habit_logs",l.id);else await add("habit_logs",{habit_id:id,day:b.dataset.day})}
+  else if(a==="habitdel"){if(confirm("Delete this habit?")){await del("habits",id);S.habit_logs=S.habit_logs.filter(l=>l.habit_id!==id)}}
+  else if(a==="moddel")await del("modules",id);
+  else if(a==="occdel")await del("occasions",id);
+  else if(a==="ntest"){const r=await api("POST","notify-test",{});if(r&&r.native)toast("Test sent. A notification should pop up now.");else ping("test"+Date.now(),"Dynasty","Notifications are working",true)}
+  else if(a==="notif"){await Notification.requestPermission()}
+  else if(a==="feedsync")await syncFeed();
+  render();
+});
+document.addEventListener("submit",async e=>{
+  const f=e.target.closest("[data-form]");if(!f)return;e.preventDefault();
+  const v=Object.fromEntries(new FormData(f)),k=f.dataset.form;
+  if(k==="task"){const space=f.dataset.space||v.space;await add("tasks",{title:v.title.trim(),space,module:space==="University"?(f.dataset.module||v.module||""):"",priority:"",due:v.due||"",done:0,done_at:"",star:0,today:+f.dataset.today,notes:"",source_key:""})}
+  else if(k==="module"){const c=v.code.trim();if(!S.modules.some(m=>m.code===c))await add("modules",{code:c,name:""})}
+  else if(k==="goal")await add("goals",{title:v.title.trim(),space:v.space,target:+v.target||1,progress:0});
+  else if(k==="habit")await add("habits",{name:v.name.trim()});
+  else if(k==="card"){const nid=+v.note;if(nid&&v.front.trim()&&v.back.trim())await mergeCards(nid,[{kind:"qa",front:v.front.trim(),back:v.back.trim(),answer:v.back.trim(),ckey:"manual:"+Date.now()}])}
+  else if(k==="occ"){
+    const date=occasionDate(v);if(!date){toast("Please enter a valid day and month, and a year from 1900 to this year if known.");return}
+    if(!v.name.trim()){toast("Please enter a name.");return}
+    if(!await add("occasions",{kind:f.dataset.kind,name:v.name.trim(),date}))return;
+  }
+  else if(k==="feed"){await setCfg("feed_url",v.url.trim());await syncFeed()}
+  render();
+});
+document.addEventListener("change",async e=>{
+  const t=e.target,k=t.dataset.f;
+  if(k==="questGoal"){
+    if(t.value&&!CAT.some(c=>c.k===t.value))return;
+    await setCfg("kingdom_goal",t.value);render();
+  }else if(k==="space"){UI.fSpace=t.value;render()}else if(k==="mod"){UI.fMod=t.value;render()}
+  else if(k==="done"){UI.showDone=t.checked;render()}else if(k==="cq"){UI.cq=t.value;render()}else if(k==="nmod"){UI.nmod=t.value;render()}else if(k==="cmod"){UI.cmod=t.value;UI.cdeck="";render()}else if(k==="imod")UI.imod=t.value;else if(k==="impmap")UI.imp.groups[+t.dataset.g].map=t.value;else if(k==="impopt")UI.imp.opts[t.dataset.k]=t.checked;else if(k==="notemod"){await upd("notes",+t.dataset.id,{module:t.value});render()}else if(k==="cdeck"){UI.cdeck=t.value;render()}
+  else if(k==="ft")UI.f.task=t.value;
+  else if(k==="fm"){UI.f.mins=Math.max(1,+t.value||25);if(!UI.f.run)render()}
+  else if(t.dataset.cfg){await setCfg(t.dataset.cfg,t.value);toast("Saved")}
+  else if(t.dataset.zip!==undefined&&t.files.length){await readZip(t.files[0]);t.value=""}
+  else if(t.dataset.dir!==undefined&&t.files.length){await readFolder(t.files);t.value=""}
+  else if(t.dataset.md!==undefined&&t.files.length){
+    let made=0,notes=0;
+    for(const f of t.files){const text=await f.text(),h1=(text.match(/^#\s+(.+)$/m)||[])[1],title=(h1||f.name.replace(/\.(md|markdown|txt)$/i,"")).trim();
+      if(S.notes.some(n=>n.title===title&&n.body===text))continue;
+      const n=await add("notes",{title,body:text,module:importModule(title,f.name),updated:new Date().toISOString()});
+      if(n){UI.note=n.id;notes++;made+=(await mergeCards(n.id,mdCards(n))).added}}
+    toast(notes?`Imported ${notes} note${notes>1?"s":""} and made ${made} flashcards`:"Those notes are already imported");render()}
+  else if(t.id==="nb"){const id=+t.dataset.id,n=S.notes.find(x=>x.id===id);if(n&&S.cards.some(c=>c.note_id===id)){const r=await mergeCards(id,mdCards(n));if(r.added||r.updated)toast(`Flashcards updated: ${r.added} new, ${r.updated} changed`)}}
+  else if(t.id==="nt")render();
+});
+let nT;
+document.addEventListener("input",e=>{
+  const t=e.target;if(t.id!=="nt"&&t.id!=="nb")return;
+  const n=S.notes.find(x=>x.id===+t.dataset.id);n[t.id==="nt"?"title":"body"]=t.value;n.updated=new Date().toISOString();
+  clearTimeout(nT);nT=setTimeout(()=>api("PUT","notes/"+n.id,{title:n.title,body:n.body,updated:n.updated}),400);
+});
+document.addEventListener("toggle",e=>{const d=e.target;if(!d.classList||!d.classList.contains("mod"))return;const k=d.dataset.mod;if(d.open)closedMods.delete(k);else closedMods.add(k);localStorage.setItem("closedMods",JSON.stringify([...closedMods]))},true);
+document.addEventListener("keydown",e=>{
+  if(e.target.matches&&e.target.matches(".plot")&&(e.key==="Enter"||e.key===" ")){e.preventDefault();e.target.dispatchEvent(new MouseEvent("click",{bubbles:true}));return}
+  const st=UI.st;if(!st||!location.hash.startsWith("#study/"))return;
+  if(e.target.id==="ans"&&e.key==="Enter"&&!e.shiftKey){e.preventDefault();checkAnswer();render();return}
+  if(/^(TEXTAREA|INPUT|SELECT)$/.test(e.target.tagName))return;
+  if(st.phase==="graded"&&/^[1-4]$/.test(e.key))rate(+e.key).then(render);
+  else if(st.phase==="ask"&&cfg("study_mode")==="flip"&&e.key===" "){e.preventDefault();st.score=null;st.phase="graded";render()}
+});
+document.addEventListener("keydown",e=>{
+  if(!(e.metaKey||e.ctrlKey)||e.key.toLowerCase()!=="z"||e.shiftKey||/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName))return;
+  const last=S.trash.filter(x=>x.kind==="task").sort((a,b)=>b.deleted_at-a.deleted_at)[0];
+  if(last){e.preventDefault();restoreTask(last.id).then(render)}
+});
+window.addEventListener("hashchange",render);
+(async()=>{Object.assign(S,await (await fetch("/api/all")).json());try{const j=await (await fetch("/api/ping")).json();NATIVE=!!j.native}catch(e){}await migrate();fixSpaces();purgeTrash();buildNav();render();check();setInterval(check,30000);setInterval(tick,1000);setInterval(()=>fetch("/api/ping").then(r=>r.json()).then(j=>{NATIVE=!!j.native;setDown(false)},()=>setDown(true)),8000);setInterval(()=>{const e=$("#greet");if(e)e.textContent=greet()},60000);maybeSync();setInterval(maybeSync,600000)})();
+</script>
+</body>
+</html>
